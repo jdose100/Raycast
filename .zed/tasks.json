@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Run",
+    "command": "nix-shell --run 'cmake --build build/ -j16' && ./build/main",
+    "use_new_terminal": false,
+    "show_command": false,
+    "show_summary": true,
+    "reveal": "no_focus",
+    
+    "tags": ["run"]
+  },
+  {
+    "label": "Build",
+    "command": "nix-shell --run 'cmake --build build/ -j16'",
+    "use_new_terminal": false,
+    "show_command": false,
+    "show_summary": true,
+    "reveal": "no_focus",
+    
+    "tags": ["build"]
+  }
+]

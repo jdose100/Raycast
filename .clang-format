@@ -1,0 +1,43 @@
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+Language: C
+ColumnLimit: 100
+
+# --- ALIGN --- #
+AlignAfterOpenBracket: true
+AlignArrayOfStructures: Left
+AlignEscapedNewlines: Right
+AlignOperands: AlignAfterOperator
+PointerAlignment: Right
+
+# --- ALLOW --- #
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+
+# --- EXT --- #
+BinPackParameters: OnePerLine
+SpaceAfterCStyleCast: false
+
+BreakBeforeBraces: Linux
+BreakAfterAttributes: Never
+
+IncludeBlocks: Preserve
+MainIncludeChar: AngleBracket
+
+# --- INDENT --- #
+IndentGotoLabels: false
+IndentPPDirectives: BeforeHash
+IndentCaseBlocks: false
+IndentCaseLabels: true
+
+# --- ADDITIONAL --- #
+AlignConsecutiveShortCaseStatements:
+    AcrossEmptyLines: true
+    AlignCaseArrows: true
+    AlignCaseColons: true
+    Enabled: false
+
+AlignConsecutiveMacros:
+    Enabled: true
