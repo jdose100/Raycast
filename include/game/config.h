@@ -19,10 +19,10 @@ static constexpr ivec2_t map_size = {.x = 12, .y = 10};
 static int map[map_size.x][map_size.y] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 1, 1, 0, 1},
@@ -31,10 +31,9 @@ static int map[map_size.x][map_size.y] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
-static constexpr int title_size = 64;
-static constexpr int wall_height = 64;
-
-static constexpr double fov = 60;
+// FOV = degree * (M_PI / 180) - это перевод градусов в радианты
+// для угла degree в градусах.
+static constexpr double fov = 90 * (M_PI / 180);
 static constexpr double half_fov = fov / 2;
 
 static auto const title = "Raycast game";
@@ -46,18 +45,18 @@ static constexpr struct __screen_config_data screen = {
     .half_height = 600 / 2,
 };
 
-//! \important Не менять!
-static double projection_plane_direction;
-
 [[maybe_unused]] static player_t player = {
     .pos = {.x = 2, .y = 2},
 };
 
 static camera_t main_camera = {
-    .pos = {.x = 4 * title_size, .y = 4 * title_size},
-    .angle = 0,
+    .pos = {.x = 2, .y = 2},
+    .direction = 0,
 };
-constexpr double camera_speed = 2;
+constexpr double camera_speed = 0.1 / 2;
+constexpr double camera_side_speed = camera_speed * 2.5;
+
+constexpr auto max_raycast_distance = 30.0;
 
 // --- Recovery GCC and clang diagnostics --- //
 #ifdef __GNUC__

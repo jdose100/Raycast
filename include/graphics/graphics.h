@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 //! Данные для отрисовки.
-typedef struct {
+typedef struct renderer_data_s {
     SDL_Renderer *renderer;  //< sdl renderer ptr
     SDL_Window *window;      //< sdl window ptr
 } renderer_data_t;
@@ -43,11 +43,7 @@ typedef struct {
 // --- FUNCTIONS --- //
 
 //! Инициализация движка графики.
-static void graphics_init(void)
-{
-    projection_plane_direction = screen.half_width / tan(degree_to_radians(half_fov));
-    __raycast_sin_cost_table_init();
-}
+static void graphics_init(void) { __raycast_sin_cost_table_init(); }
 
 #ifdef __cplusplus
 }

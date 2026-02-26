@@ -31,39 +31,43 @@ SDL_AppResult SDL_AppInit([[maybe_unused]] void **app_state,
 void SDL_AppQuit([[maybe_unused]] void *appstate, [[maybe_unused]] SDL_AppResult result) {}
 
 SDL_AppResult SDL_AppEvent([[maybe_unused]] void *appstate, SDL_Event *event)
-{
+{    
     switch (event->type) {
         case SDL_EVENT_QUIT: return SDL_APP_SUCCESS;
 
         case SDL_EVENT_MOUSE_MOTION: {
-            // Шаг вращения угла в пределах 360 градусов.
-            constexpr const double step = 360.0 / screen.width;
+            constexpr double rotate_speed = 0.05;
 
-            // Получаем коодинату x мыши.
-            SDL_GetMouseState(&main_camera.mice_x, nullptr);
-
-            // Вращаем угол (если необходимо).
-            const float difference = main_camera.mice_x - main_camera.last_x;
-            if (difference == 0) break;
-            main_camera.angle += step * difference;
-
-            // Нормализует угл для сохранения предела [0; 360].
-            while (main_camera.angle > 360.0) main_camera.angle -= 360.0;
-            while (main_camera.angle < 0.0) main_camera.angle += 360.0;
-
-            // Сохраняем прошлое значение x.
-            main_camera.last_x = main_camera.mice_x;
+            main_camera.direction += event->motion.xrel * rotate_speed;
+            if (main_camera.direction > M_PI) main_camera.direction -= 2 * M_PI;
+            if (main_camera.direction < -M_PI) main_camera.direction += 2 * M_PI;
         } break;
 
         case SDL_EVENT_KEY_DOWN: {
-            if (event->key.key == SDLK_W) main_camera.pos.x += camera_speed;  // forward
-            if (event->key.key == SDLK_S) main_camera.pos.x -= camera_speed;  // back
-            if (event->key.key == SDLK_D) main_camera.pos.y += camera_speed;  // right
-            if (event->key.key == SDLK_A) main_camera.pos.y -= camera_speed;  // left
+            const SDL_Keycode key = event->key.key;
 
-            printf("cam pos: x(%f), y(%f)\n", main_camera.pos.x / title_size,
-                   main_camera.pos.y / title_size);
+            if (key == SDLK_W) /* forward */ {
+                main_camera.pos.x += cos(main_camera.direction) * camera_speed;
+                main_camera.pos.y += sin(main_camera.direction) * camera_speed;
+            }
+
+            if (key == SDLK_S) /* back */ {
+                main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
+                main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
+            }
+
+            if (key == SDLK_D) /* right */ {
+                main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
+                main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
+            }
+
+            if (key == SDLK_A) /* left */ {
+                main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
+                main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
+            }
         } break;
+
+        default: break;
     }
 
     return SDL_APP_CONTINUE;
@@ -75,7 +79,7 @@ SDL_AppResult SDL_AppIterate([[maybe_unused]] void *appstate)
     SDL_RenderClear(renderer_data.renderer);
 
     SDL_SetRenderDrawColor(renderer_data.renderer, 240, 240, 240, 30);
-    raycastring(&renderer_data);
+    drawing(&renderer_data);
 
     SDL_RenderPresent(renderer_data.renderer);
     return SDL_APP_CONTINUE;

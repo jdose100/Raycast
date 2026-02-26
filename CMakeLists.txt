@@ -5,7 +5,10 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_ID STREQUAL 
     message(FATAL_ERROR "This project support only GCC 15 (or never) or Clang 22 (or never). You use" ${CMAKE_C_COMPILER_ID})
 endif ()
 
+###################
 ### -- SDL3 -- ###
+##################
+
 find_package(SDL3)
 if (NOT SDL3_FOUND)
     include(FetchContent)
@@ -18,7 +21,10 @@ if (NOT SDL3_FOUND)
     FetchContent_MakeAvailable(SDL3)
 endif ()
 
+######################
 ### -- SETTINGS -- ###
+######################
+
 # set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 # set(CMAKE_C_STANDARD_REQUIRED ON)
 # set(CMAKE_C_EXTENSIONS ON)
@@ -32,19 +38,39 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
 endif ()
 
+########################
 ### -- EXECUTABLE -- ###
+########################
+
 set(MATH_LIB m)
 
 add_executable(main ${PROJECT_SOURCE_DIR}/main.c)
 target_link_libraries(main PRIVATE SDL3::SDL3 ${MATH_LIB})
-target_compile_options(main PRIVATE -std=gnu2y -Wall -Wextra -Werror)
 target_include_directories(main PRIVATE
     ${PROJECT_SOURCE_DIR}/ext_include
     ${PROJECT_SOURCE_DIR}/include
 )
 
+target_compile_options(main PRIVATE
+    -std=gnu2y -fstack-protector-strong
+    -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
+    -Wswitch -Wswitch-enum -Wswitch-default -Wshadow -Wconversion 
+    -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
+    -Wzero-as-null-pointer-constant -Wundef
+)
+
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU") # gcc specific flags
+    target_compile_options(main PRIVATE -fanalyzer)
+else () # clang specific flags
+    target_compile_options(main PRIVATE -Wnull-dereference)
+endif ()
+
+#########################
+### -- DEBUG SETUP -- ###
+#########################
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT WIN32)
-    target_compile_options(main PRIVATE -g
+    target_compile_options(main PRIVATE -g -Og -fno-omit-frame-pointer
         -fsanitize=address -fsanitize=undefined
         -fno-sanitize-recover=all -fno-sanitize=null -fno-sanitize=alignment
         # -fsanitize-blacklist=${PROJECT_SOURCE_DIR}/ignorelist.txt
@@ -54,7 +80,10 @@ else ()
     target_compile_options(main PRIVATE -O3 -ffast-math)
 endif ()
 
+###########################
 ### -- DOCUMENTATION -- ###
+###########################
+
 find_package(Doxygen)
 if (Doxygen_FOUND)
     set(DOXYGEN_FILE_PATTERNS *.c *.h)
