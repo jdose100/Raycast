@@ -19,9 +19,9 @@ static constexpr ivec2_t map_size = {.x = 12, .y = 10};
 static int map[map_size.x][map_size.y] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 1, 1, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -50,11 +50,11 @@ static constexpr struct __screen_config_data screen = {
 };
 
 static camera_t main_camera = {
-    .pos = {.x = 2, .y = 2},
+    .pos = {.x = 1, .y = 8},
     .direction = 0,
 };
 constexpr double camera_speed = 0.1 / 2;
-constexpr double camera_side_speed = camera_speed * 2.5;
+constexpr double camera_side_speed = camera_speed * 1.3;
 
 constexpr auto max_raycast_distance = 30.0;
 

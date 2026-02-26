@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 //! Данные для отрисовки.
-typedef struct renderer_data_s {
+typedef struct {
     SDL_Renderer *renderer;  //< sdl renderer ptr
     SDL_Window *window;      //< sdl window ptr
 } renderer_data_t;
@@ -34,8 +34,8 @@ typedef struct renderer_data_s {
                                      &self->renderer))
         return false;
 
-    SDL_SetRenderLogicalPresentation(self->renderer, screen.width, screen.height,
-                                     SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    // SDL_SetRenderLogicalPresentation(self->renderer, screen.width, screen.height,
+    //                                  SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
     return true;
 }

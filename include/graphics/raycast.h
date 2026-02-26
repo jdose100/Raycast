@@ -20,7 +20,7 @@
 
 [[gnu::nonnull(2)]] [[nodiscard]] static inline bool _raycast(const int, double *);
 
-//! Рисует мир. 
+//! Рисует мир.
 static void drawing(renderer_data_t *render_data)
 {
     for (auto x = 0; x < screen.width; x++) {
@@ -32,6 +32,8 @@ static void drawing(renderer_data_t *render_data)
         const int start_y = screen.half_height - lineHeight;
         const int end_y = screen.half_height + lineHeight;
 
+        Uint8 shade = (Uint8)(255 / (1.0 + distance * distance * 0.1));
+        SDL_SetRenderDrawColor(render_data->renderer, shade, shade, shade, 255);
         SDL_RenderLine(render_data->renderer, (float)x, (float)start_y, (float)x, (float)end_y);
     }
 }
@@ -64,12 +66,12 @@ bool _raycast(const int x, double *out_distance)
         const int map_x = (int)ray_x;
         const int map_y = (int)ray_y;
 
-        if (map_x < 0 || map_x >= map_size.x || map_y < 0 || map_y >= map_size.y)
-            break;
-        else if (map[map_x][map_y]) {
-            /* Получаем финальную дистанцию без fish-eye эффекта. */
-            *out_distance = distance * cos(ray_direction - main_camera.direction);
-            return true;
+        if (map_x >= 0 && map_x < map_size.x && map_y >= 0 && map_y < map_size.y) {
+            if (map[map_x][map_y]) {
+                /* Получаем финальную дистанцию без fish-eye эффекта. */
+                *out_distance = distance * cos(ray_direction - main_camera.direction);
+                return true;
+            }
         }
 
         distance += delta;

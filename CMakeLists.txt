@@ -54,13 +54,15 @@ target_include_directories(main PRIVATE
 target_compile_options(main PRIVATE
     -std=gnu2y -fstack-protector-strong
     -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
-    -Wswitch -Wswitch-enum -Wswitch-default -Wshadow -Wconversion 
+    -Wswitch -Wswitch-enum -Wswitch-default -Wconversion
     -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
     -Wzero-as-null-pointer-constant -Wundef
 )
 
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU") # gcc specific flags
-    target_compile_options(main PRIVATE -fanalyzer)
+    target_compile_options(main PRIVATE -fanalyzer 
+        --include ${PROJECT_SOURCE_DIR}/ext_include/defer.h
+    )
 else () # clang specific flags
     target_compile_options(main PRIVATE -Wnull-dereference)
 endif ()

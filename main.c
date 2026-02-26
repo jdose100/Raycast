@@ -31,7 +31,7 @@ SDL_AppResult SDL_AppInit([[maybe_unused]] void **app_state,
 void SDL_AppQuit([[maybe_unused]] void *appstate, [[maybe_unused]] SDL_AppResult result) {}
 
 SDL_AppResult SDL_AppEvent([[maybe_unused]] void *appstate, SDL_Event *event)
-{    
+{
     switch (event->type) {
         case SDL_EVENT_QUIT: return SDL_APP_SUCCESS;
 
@@ -43,31 +43,32 @@ SDL_AppResult SDL_AppEvent([[maybe_unused]] void *appstate, SDL_Event *event)
             if (main_camera.direction < -M_PI) main_camera.direction += 2 * M_PI;
         } break;
 
-        case SDL_EVENT_KEY_DOWN: {
-            const SDL_Keycode key = event->key.key;
-
-            if (key == SDLK_W) /* forward */ {
-                main_camera.pos.x += cos(main_camera.direction) * camera_speed;
-                main_camera.pos.y += sin(main_camera.direction) * camera_speed;
-            }
-
-            if (key == SDLK_S) /* back */ {
-                main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
-                main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
-            }
-
-            if (key == SDLK_D) /* right */ {
-                main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
-                main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
-            }
-
-            if (key == SDLK_A) /* left */ {
-                main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
-                main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
-            }
-        } break;
-
         default: break;
+    }
+
+    /* ##################################### */
+    /* ######### KEYBOARD HANDLING ######### */
+    /* ##################################### */
+    const bool *key_states = SDL_GetKeyboardState(nullptr);
+
+    if (key_states[SDL_SCANCODE_W]) /* forward */ {
+        main_camera.pos.x += cos(main_camera.direction) * camera_speed;
+        main_camera.pos.y += sin(main_camera.direction) * camera_speed;
+    }
+
+    if (key_states[SDL_SCANCODE_S]) /* back */ {
+        main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
+        main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
+    }
+
+    if (key_states[SDL_SCANCODE_D]) /* right */ {
+        main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
+        main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
+    }
+
+    if (key_states[SDL_SCANCODE_A]) /* left */ {
+        main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
+        main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
     }
 
     return SDL_APP_CONTINUE;
@@ -75,10 +76,8 @@ SDL_AppResult SDL_AppEvent([[maybe_unused]] void *appstate, SDL_Event *event)
 
 SDL_AppResult SDL_AppIterate([[maybe_unused]] void *appstate)
 {
-    SDL_SetRenderDrawColor(renderer_data.renderer, 30, 30, 30, 30);
+    SDL_SetRenderDrawColor(renderer_data.renderer, 30, 30, 30, 255);
     SDL_RenderClear(renderer_data.renderer);
-
-    SDL_SetRenderDrawColor(renderer_data.renderer, 240, 240, 240, 30);
     drawing(&renderer_data);
 
     SDL_RenderPresent(renderer_data.renderer);
