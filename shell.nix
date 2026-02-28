@@ -7,8 +7,17 @@ with pkgs;
 mkShell rec { 
   buildInputs = [
     gccNGPackages_15.gccWithLibc
-    radare2
-    sdl3 
+
+    vulkan-loader
+    alsa-lib
+
+    libGL
+    xorg.libX11
+    xorg.libXrandr
+    xorg.libXinerama
+    xorg.libXext
+    xorg.libXi
+    xorg.libXcursor
   ];
   
   shellHook = ''

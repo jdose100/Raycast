@@ -1,7 +1,7 @@
 [
   {
     "label": "Run",
-    "command": "nix-shell --run 'cmake --build build/ -j16' && ./build/main",
+    "command": "nix-shell --run 'clear && cmake --build build/ -j16' && ./build/main",
     "use_new_terminal": false,
     "show_command": false,
     "show_summary": true,

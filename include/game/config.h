@@ -56,7 +56,7 @@ static camera_t main_camera = {
 constexpr double camera_speed = 0.1 / 2;
 constexpr double camera_side_speed = camera_speed * 1.3;
 
-constexpr auto max_raycast_distance = 30.0;
+constexpr auto max_raycast_distance = 20.0;
 
 // --- Recovery GCC and clang diagnostics --- //
 #ifdef __GNUC__

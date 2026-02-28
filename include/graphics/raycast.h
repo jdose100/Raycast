@@ -14,14 +14,16 @@
 
 #pragma once
 
+#include <sokol_gfx.h>
+#include <sokol_gl.h>
+
 #include "ext_math.h"
 #include "game/config.h"
-#include "graphics/graphics.h"
 
 [[gnu::nonnull(2)]] [[nodiscard]] static inline bool _raycast(const int, double *);
 
 //! Рисует мир.
-static void drawing(renderer_data_t *render_data)
+static void drawing()
 {
     for (auto x = 0; x < screen.width; x++) {
         double distance;
@@ -31,10 +33,18 @@ static void drawing(renderer_data_t *render_data)
         const int lineHeight = (int)(screen.height / distance) / 2;
         const int start_y = screen.half_height - lineHeight;
         const int end_y = screen.half_height + lineHeight;
+        const uint8_t shade = (uint8_t)(255 / (1.0 + distance * distance * 0.1) - 1.f);
 
-        Uint8 shade = (Uint8)(255 / (1.0 + distance * distance * 0.1));
-        SDL_SetRenderDrawColor(render_data->renderer, shade, shade, shade, 255);
-        SDL_RenderLine(render_data->renderer, (float)x, (float)start_y, (float)x, (float)end_y);
+        /* Нормализация координат. */
+        const float start_y_normalized = (2.f * (float)start_y / screen.height) - 1.f;
+        const float end_y_normalized = (2.f * (float)end_y / screen.height) - 1.f;
+        const float normalized_x = (2.f * (float)x / screen.width) - 1.f;
+
+        sgl_begin_line_strip();  // clang-format off
+            sgl_c3b(shade, shade, shade);
+            sgl_v2f(normalized_x, start_y_normalized);
+            sgl_v2f(normalized_x, end_y_normalized);
+        sgl_end();  // clang-format on
     }
 }
 
