@@ -14,10 +14,17 @@ target_include_directories(depencides
 # Настройка флагов линковки в зависимости от доступной платформы.
 if (WIN32)
     target_compile_options(depencides PRIVATE -mwin32 -mwindows)
+    target_link_libraries(depencides PUBLIC kernel32 user32 shell32)
 
-    # Используется vulkan-1.lib из версии Vulkan SDK 1.3.275.0
-    target_link_directories(depencides PUBLIC ${PROJECT_SOURCE_DIR})
-    target_link_libraries(depencides PUBLIC kernel32 user32 shell32 vulkan-1)
+    find_package(Vulkan)
+    if (Vulkan_FOUND)
+        target_link_libraries(depencides PUBLIC Vulkan::Vulkan)
+        target_compile_definitions(depencides PRIVATE SOKOL_VULKAN)
+        message("Used Vulkan")
+    else ()
+        target_compile_definitions(depencides PRIVATE SOKOL_GLCORE)
+        message("Used OpenGL")
+    endif () 
 elseif (LINUX)
     target_link_libraries(depencides PUBLIC pthread X11 Xi Xcursor vulkan)
 endif ()

@@ -8,9 +8,8 @@
 #include "stb_image.h"
 
 #define SOKOL_IMPL
-#define SOKOL_VULKAN
 #include "sokol_app.h"
-// #include "sokol_audio.h"
+#include "sokol_audio.h"
 #include "sokol_gfx.h"
 #include "sokol_gl.h"
 #include "sokol_glue.h"
