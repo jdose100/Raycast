@@ -1,5 +1,5 @@
 CompileFlags:
-    Add: [ -fdefer-ts, -D defer=_Defer, -U __GNUC__, -Wno-unused-function ]
+    Add: [ -std=gnu2y, -Iinclude, -fdefer-ts, -D defer=_Defer, -U __GNUC__, -Wno-unused-function, -D _USE_MATH_DEFINES  ]
     
 Documentation:
   CommentFormat: Doxygen

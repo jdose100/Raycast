@@ -7,8 +7,6 @@
 #include "graphics/raycast.h"
 // #include "graphics/textures.h"
 
-#include "game/config.h"
-
 enum KEYS : unsigned char {
     KEY_W = 1,
     KEY_S,

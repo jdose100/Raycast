@@ -37,15 +37,14 @@ target_compile_options(main PRIVATE
     -Wswitch -Wswitch-enum -Wswitch-default -Wconversion
     -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
     -Wzero-as-null-pointer-constant -Wundef
+    --include defer.h
 )
 
 # -- Specific flags
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU") # gcc specific flags
-    target_compile_options(main PRIVATE -fanalyzer
-        --include ${PROJECT_SOURCE_DIR}/depencides/include/defer.h
-    )
+    target_compile_options(main PRIVATE -fanalyzer)
 else () # clang specific flags
-    target_compile_options(main PRIVATE -Wnull-dereference)
+    target_compile_options(main PRIVATE -Wnull-dereference -fdefer-ts)
 endif ()
 
 #########################
@@ -65,6 +64,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif ()
 else ()
     target_compile_options(main PRIVATE -O3 -ffast-math)
+
+    if (WIN32)
+        target_compile_options(main PRIVATE -mwindows)
+    endif ()
 endif ()
 
 ###########################

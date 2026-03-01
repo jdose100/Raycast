@@ -7,16 +7,15 @@
         #endif
     #endif
 #elif __GNUC__ > 8 && !defined(defer)
-    #define defer _Defer
-    #define _Defer _Defer_A(__COUNTER__)
+    #define defer       _Defer
+    #define _Defer      _Defer_A(__COUNTER__)
     #define _Defer_A(N) _Defer_B(N)
     #define _Defer_B(N) _Defer_C(_Defer_func_##N, _Defer_var_##N)
-    #define _Defer_C(F, V)                                                     \
-        auto void F(int *);                                                    \
-        __attribute__((__cleanup__(F), __deprecated__, __unused__)) int V;     \
-        __attribute__((__always_inline__, __deprecated__,                      \
-                       __unused__)) inline auto void                           \
-        F(__attribute__((__unused__)) int *V)
+    #define _Defer_C(F, V)                                                                         \
+        auto void F(int *);                                                                        \
+        __attribute__((__cleanup__(F), __deprecated__, __unused__)) int V;                         \
+        __attribute__((__always_inline__, __deprecated__, __unused__)) inline auto void F(         \
+            __attribute__((__unused__)) int *V)
 #endif
 
 #ifndef defer
