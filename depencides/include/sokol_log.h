@@ -121,6 +121,14 @@
 extern "C" {
 #endif
 
+#define SLOG_PANIC 0
+#define SLOG_ERR 1
+#define SLOG_WARN 2
+#define SLOG_INFO 3
+
+#define slog(tag, log_level, log_item, msg) \
+    slog_func(tag, log_level, log_item, msg, __LINE__, __FILE_NAME__, NULL)
+
 /*
     Plug this function into the 'logger.func' struct item when initializing any of the sokol
     headers. For instance for sokol_audio.h it would look like this:

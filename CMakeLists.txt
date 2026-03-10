@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 project(raycasting-game LANGUAGES C VERSION 0.0.1)
 add_subdirectory(depencides)
+add_subdirectory(shaders)
 
 if (NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "This project support only GCC 15 (or never) or Clang 22 (or never). You use" ${CMAKE_C_COMPILER_ID})
@@ -28,16 +29,16 @@ endif ()
 set(MATH_LIB m)
 
 add_executable(main ${PROJECT_SOURCE_DIR}/main.c)
-target_link_libraries(main PRIVATE ${MATH_LIB} depencides)
+target_link_libraries(main PRIVATE ${MATH_LIB} depencides shaders)
 target_include_directories(main PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 target_compile_options(main PRIVATE
-    -std=gnu2y -fstack-protector-strong
+    -std=gnu2y -fstack-protector-strong --include defer.h
+    # Warnings
     -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
     -Wswitch -Wswitch-enum -Wswitch-default -Wconversion
     -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
-    -Wzero-as-null-pointer-constant -Wundef
-    --include defer.h
+    -Wundef 
 )
 
 # -- Specific flags
@@ -66,7 +67,7 @@ else ()
     target_compile_options(main PRIVATE -O3 -ffast-math)
 
     if (WIN32)
-        target_compile_options(main PRIVATE -mwindows)
+        target_compile_options(main PRIVATE -mwin32 -mwindows)
     endif ()
 endif ()
 

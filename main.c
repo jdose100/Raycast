@@ -2,10 +2,14 @@
 #include <sokol_gfx.h>
 #include <sokol_gl.h>
 #include <sokol_glue.h>
+#include <sokol_help.h>
 #include <sokol_log.h>
+#include <stb_image.h>
+
+#include <shaders/raycast.glsl.h>
 
 #include "graphics/raycast.h"
-// #include "graphics/textures.h"
+#include "graphics/textures.h"
 
 enum KEYS : unsigned char {
     KEY_W = 1,
@@ -17,9 +21,12 @@ enum KEYS : unsigned char {
 };
 
 static struct {
-    sg_pipeline pipeline;
-    sg_bindings bindings;
-    sg_pass_action pass_action;
+    sg_pipeline pip;
+    sg_bindings bind;
+    sg_pass_action action;
+
+    sg_sampler sampler;
+    sg_view view;
 
     bool keys_buffer[KEYS_SIZE];  //< Буфер нажатых клавиш с индексом KEYS.
 } state;
@@ -36,7 +43,18 @@ static void init(void)
     sgl_setup(&(sgl_desc_t){.logger.func = slog_func});
 
     // Инициализация state.
-    state.pass_action = (sg_pass_action){
+
+    /* Инициализация view и sampler. */
+    state.sampler = sg_make_sampler(&(sg_sampler_desc){});
+
+    // Загрузка изображения.
+    const char image_path[] = "assets/textures/wall_2.png";
+    if (load_texture(&state.view, image_path) != LOAD_TEXTURE_OK) {
+        slog("start, load image", SLOG_PANIC, 0, "Error while loading image");
+    }
+
+    /* Инициализация action. */
+    state.action = (sg_pass_action){
         .colors[0] =  /* clang-format off */ {
             .load_action = SG_LOADACTION_CLEAR,
             .clear_value = { 0.3f, 0.3f, 0.3f, 0.3f},
@@ -44,14 +62,18 @@ static void init(void)
     };
 }
 
-static void cleanup(void) { sg_shutdown(); }
+static void cleanup(void)
+{
+    sgl_shutdown();
+    sg_shutdown();
+}
 
 void frame(void)
 {
-    sg_begin_pass(&(sg_pass){.action = state.pass_action, .swapchain = sglue_swapchain()});
+    sg_begin_pass(&(sg_pass){.action = state.action, .swapchain = sglue_swapchain()});
     sgl_defaults();
 
-    drawing();
+    drawing(state.view, state.sampler);
 
     sgl_draw();
     sg_end_pass();
