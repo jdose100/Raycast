@@ -20,13 +20,18 @@
 
 #include "ext_math.h"
 #include "game/config.h"
+#include "graphics/graphics.h"
 
-[[gnu::nonnull(2)]] [[nodiscard]] static inline bool _raycast(const int, double *, double *);
+static void _load_draw_texture(const int);
+
+[[gnu::nonnull(2, 3, 4)]] [[nodiscard]] static inline bool _raycast(const int,
+                                                                    double *,
+                                                                    double *,
+                                                                    int *);
 
 //! Рисует мир.
-static void drawing(sg_view view, sg_sampler sampler)
+static void drawing()
 {
-    sgl_texture(view, sampler);
     sgl_enable_texture();
     defer { sgl_disable_texture(); }
 
@@ -35,7 +40,8 @@ static void drawing(sg_view view, sg_sampler sampler)
 
     for (auto x = 0; x < screen.width; x++) {
         double distance, u;
-        if (!_raycast(x, &distance, &u)) continue;
+        int map_cell;
+        if (!_raycast(x, &distance, &u, &map_cell)) continue;
 
         /* Высота стенки на экране */
         const int line_height = (int)((screen.height / distance) / 2);
@@ -54,6 +60,22 @@ static void drawing(sg_view view, sg_sampler sampler)
         sgl_v2f_t2f(x_normalized, start_y_normalized, (float)u, 1.0);
         sgl_v2f_t2f(x_normalized, end_y_normalized, (float)u, 0.0);
         sgl_c3b(shade, shade, shade);
+        _load_draw_texture(map_cell);
+    }
+}
+
+void _load_draw_texture(const int map_cell)
+{
+    switch (map_cell) {
+        case 1: {
+            sgl_texture(_textures[0].view, _textures[0].sampler);
+        } break;
+
+        case 2: {
+            sgl_texture(_textures[1].view, _textures[1].sampler);
+        } break;
+
+        default: break;
     }
 }
 
@@ -67,7 +89,7 @@ static void drawing(sg_view view, sg_sampler sampler)
     \param[out] out_u координата x для текстур.
     \return true если стена была найдена, иначе false.
 */
-bool _raycast(const int x, double *out_distance, double *out_u)
+bool _raycast(const int x, double *out_distance, double *out_u, int *finded_map_cell)
 {
     constexpr auto delta = 0.005;
 
@@ -91,6 +113,8 @@ bool _raycast(const int x, double *out_distance, double *out_u)
         if (map_x >= 0 && map_x < map_size.x && map_y >= 0 && map_y < map_size.y) {
             // проверка на наличие стены (map[map_x][map_y] != 0)
             if (map[map_x][map_y]) {
+                *finded_map_cell = map[map_x][map_y];
+
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
                 *out_distance = distance * cos(ray_direction - main_camera.direction);
 

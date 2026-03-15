@@ -60,6 +60,8 @@ static void init(void)
             .clear_value = { 0.3f, 0.3f, 0.3f, 0.3f},
         },  /* clang-format on */
     };
+
+    graphics_init();
 }
 
 static void cleanup(void)
@@ -73,7 +75,7 @@ void frame(void)
     sg_begin_pass(&(sg_pass){.action = state.action, .swapchain = sglue_swapchain()});
     sgl_defaults();
 
-    drawing(state.view, state.sampler);
+    drawing();
 
     sgl_draw();
     sg_end_pass();
