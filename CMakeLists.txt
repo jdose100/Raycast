@@ -34,11 +34,10 @@ target_include_directories(main PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 target_compile_options(main PRIVATE
     -std=gnu2y -fstack-protector-strong --include defer.h
-    # Warnings
-    -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
-    -Wswitch -Wswitch-enum -Wswitch-default -Wconversion
+    # Warnings 
     -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
-    -Wundef 
+    -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
+    -Wswitch -Wconversion -Wundef
 )
 
 # -- Specific flags

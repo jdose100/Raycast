@@ -84,14 +84,6 @@ void frame(void)
 
 static void event(const sapp_event *event)
 {
-#ifdef __GNUC__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wswitch-enum"
-#elifdef __clang__
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wswitch-enum"
-#endif
-
     switch (event->type) {
         case SAPP_EVENTTYPE_MOUSE_MOVE: /* Обработка движений мыши. */ {
             constexpr double rotate_speed = 0.05;
@@ -139,12 +131,6 @@ static void event(const sapp_event *event)
         main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
         main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
     }
-
-#ifdef __GNUC__
-    #pragma GCC diagnostic pop
-#elifdef __clang__
-    #pragma clang diagnostic pop
-#endif
 }
 
 sapp_desc sokol_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
