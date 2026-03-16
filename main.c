@@ -6,10 +6,8 @@
 #include <sokol_log.h>
 #include <stb_image.h>
 
-#include <shaders/raycast.glsl.h>
-#include "game/gamelogics.h"
+#include "game/move_physics.h"
 #include "graphics/raycast.h"
-#include "graphics/textures.h"
 
 enum KEYS : unsigned char {
     KEY_W = 1,
@@ -24,9 +22,6 @@ static struct {
     sg_pipeline pip;
     sg_bindings bind;
     sg_pass_action action;
-
-    sg_sampler sampler;
-    sg_view view;
 
     bool keys_buffer[KEYS_SIZE];  //< Буфер нажатых клавиш с индексом KEYS.
 } state;
@@ -43,15 +38,6 @@ static void init(void)
     sgl_setup(&(sgl_desc_t){.logger.func = slog_func});
 
     // Инициализация state.
-
-    /* Инициализация view и sampler. */
-    state.sampler = sg_make_sampler(&(sg_sampler_desc){});
-
-    // Загрузка изображения.
-    const char image_path[] = "assets/textures/wall_2.png";
-    if (load_texture(&state.view, image_path) != LOAD_TEXTURE_OK) {
-        slog("start, load image", SLOG_PANIC, 0, "Error while loading image");
-    }
 
     /* Инициализация action. */
     state.action = (sg_pass_action){
@@ -120,27 +106,10 @@ static void event(const sapp_event *event)
     /* ### KEYBOARD HANDLING ### */
     /* ######################### */
 
-    if (state.keys_buffer[KEY_W]) /* forward */ {
-        move_forvard();
-    }
-
-    if (state.keys_buffer[KEY_S]) /* back */ {
-        move_back();
-    //    main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
-    //    main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
-    }
-
-    if (state.keys_buffer[KEY_D]) /* right */ {
-        move_right();
-    //    main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
-    //    main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
-    }
-
-    if (state.keys_buffer[KEY_A]) /* left */ {
-        move_left();
-    //    main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
-    //    main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
-    }
+    if (state.keys_buffer[KEY_W]) /* forward */ { move_forward(); }
+    if (state.keys_buffer[KEY_S]) /* back */ { move_back(); }
+    if (state.keys_buffer[KEY_D]) /* right */ { move_right(); }
+    if (state.keys_buffer[KEY_A]) /* left */ { move_left(); }
 }
 
 sapp_desc sokol_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
