@@ -7,7 +7,7 @@
 #include <stb_image.h>
 
 #include <shaders/raycast.glsl.h>
-
+#include "game/gamelogics.h"
 #include "graphics/raycast.h"
 #include "graphics/textures.h"
 
@@ -119,23 +119,25 @@ static void event(const sapp_event *event)
     /* ######################### */
 
     if (state.keys_buffer[KEY_W]) /* forward */ {
-        main_camera.pos.x += cos(main_camera.direction) * camera_speed;
-        main_camera.pos.y += sin(main_camera.direction) * camera_speed;
+        move_forvard();
     }
 
     if (state.keys_buffer[KEY_S]) /* back */ {
-        main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
-        main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
+        move_back();
+    //    main_camera.pos.x -= cos(main_camera.direction) * camera_speed;
+    //    main_camera.pos.y -= sin(main_camera.direction) * camera_speed;
     }
 
     if (state.keys_buffer[KEY_D]) /* right */ {
-        main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
-        main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
+        move_right();
+    //    main_camera.pos.x -= cos(main_camera.direction - M_PI_2) * camera_side_speed;
+    //    main_camera.pos.y -= sin(main_camera.direction - M_PI_2) * camera_side_speed;
     }
 
     if (state.keys_buffer[KEY_A]) /* left */ {
-        main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
-        main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
+        move_left();
+    //    main_camera.pos.x -= cos(main_camera.direction + M_PI_2) * camera_side_speed;
+    //    main_camera.pos.y -= sin(main_camera.direction + M_PI_2) * camera_side_speed;
     }
 
 #ifdef __GNUC__
