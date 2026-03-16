@@ -98,8 +98,8 @@ bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *fi
         /* Проверка на на отсутствия выхода за область массива. */
         if (map_x >= 0 && map_x < map_size.x && map_y >= 0 && map_y < map_size.y) {
             /* Проверка на наличие стены (map[map_x][map_y] != 0). */
-            if (map[map_x][map_y]) {
-                *finded_map_cell = map[map_x][map_y];
+            if (map[map_y][map_x]) {
+                *finded_map_cell = map[map_y][map_x];
 
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
                 *out_distance = distance * cos(ray_direction - main_camera.direction);
