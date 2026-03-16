@@ -46,7 +46,7 @@ static constexpr double half_fov = fov / 2;
 
 static auto const title = "Raycast game";
 
-static constexpr struct __screen_config_data screen = {
+static struct __screen_config_data screen = {
     .width = 800,
     .height = 600,
     .half_width = 800 / 2,
