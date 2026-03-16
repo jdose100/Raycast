@@ -106,10 +106,10 @@ static void event(const sapp_event *event)
     /* ### KEYBOARD HANDLING ### */
     /* ######################### */
 
-    if (state.keys_buffer[KEY_W]) /* forward */ { move_forward(); }
-    if (state.keys_buffer[KEY_S]) /* back */ { move_back(); }
-    if (state.keys_buffer[KEY_D]) /* right */ { move_right(); }
-    if (state.keys_buffer[KEY_A]) /* left */ { move_left(); }
+    // if (state.keys_buffer[KEY_W]) /* forward */ { move_forward(); }
+    // if (state.keys_buffer[KEY_S]) /* back */ { move_back(); }
+    // if (state.keys_buffer[KEY_D]) /* right */ { move_right(); }
+    // if (state.keys_buffer[KEY_A]) /* left */ { move_left(); }
 }
 
 sapp_desc sokol_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
