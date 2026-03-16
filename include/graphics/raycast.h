@@ -16,26 +16,27 @@
 
 #include <sokol_gfx.h>
 #include <sokol_gl.h>
-#include <stdio.h>
 
 #include "ext_math.h"
 #include "game/config.h"
+#include "graphics/graphics.h"
 
-[[gnu::nonnull(2)]] [[nodiscard]] static inline bool _raycast(const int, double *, double *);
+[[gnu::nonnull(2, 3, 4)]] [[nodiscard]] static inline bool _raycast(const int,
+                                                                    double *,
+                                                                    double *,
+                                                                    unsigned int *);
 
 //! Рисует мир.
-static void drawing(sg_view view, sg_sampler sampler)
+static void drawing()
 {
-    sgl_texture(view, sampler);
     sgl_enable_texture();
     defer { sgl_disable_texture(); }
 
-    sgl_begin_lines();
-    defer { sgl_end(); }
-
     for (auto x = 0; x < screen.width; x++) {
         double distance, u;
-        if (!_raycast(x, &distance, &u)) continue;
+        unsigned int map_cell;
+        if (!_raycast(x, &distance, &u, &map_cell)) continue;
+        map_cell = map_cell - 1;  // Приводим к индексам текстур.
 
         /* Высота стенки на экране */
         const int line_height = (int)((screen.height / distance) / 2);
@@ -51,23 +52,29 @@ static void drawing(sg_view view, sg_sampler sampler)
         const float x_normalized = (2.f * (float)x / screen.width) - 1.f;
 
         /* Отрисовка */
-        sgl_v2f_t2f(x_normalized, start_y_normalized, (float)u, 1.0);
-        sgl_v2f_t2f(x_normalized, end_y_normalized, (float)u, 0.0);
-        sgl_c3b(shade, shade, shade);
+        if (map_cell < _textures_countof)
+            sgl_texture(_textures[map_cell].view, _textures[map_cell].sampler);
+
+        sgl_begin_lines();  // clang-format off
+            sgl_v2f_t2f(x_normalized, start_y_normalized, (float)u, 1.0);
+            sgl_v2f_t2f(x_normalized, end_y_normalized, (float)u, 0.0);
+            sgl_c3b(shade, shade, shade);
+        sgl_end();  // clang-format on
     }
 }
 
 /*!
     \protected \brief Рассчитывает расстояние до близлежащей стены.
-    \details Ищет близлежащею стену относительно main_camera.
+    \details Ищет близлежащую стену относительно main_camera.
     \important Угол альфа должен быть в градусах.
 
     \param[in] x смещение.
     \param[out] out_distance возвращаемая дистанция.
     \param[out] out_u координата x для текстур.
+    \param[out] finded_map_cell найденная клетка.
     \return true если стена была найдена, иначе false.
 */
-bool _raycast(const int x, double *out_distance, double *out_u)
+bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *finded_map_cell)
 {
     constexpr auto delta = 0.005;
 
@@ -84,34 +91,32 @@ bool _raycast(const int x, double *out_distance, double *out_u)
     double distance = 0.0;
 
     while (distance < max_raycast_distance) {
-        //получаем координаты стены пересеченной лучем для проверок
+        // получаем координаты стены пересеченной лучем для проверок
         const int map_x = (int)ray_x;
         const int map_y = (int)ray_y;
-        //проверка на выход за область массива
+
+        /* Проверка на на отсутствия выхода за область массива. */
         if (map_x >= 0 && map_x < map_size.x && map_y >= 0 && map_y < map_size.y) {
-            // проверка на наличие стены (map[map_x][map_y] != 0)
+            /* Проверка на наличие стены (map[map_x][map_y] != 0). */
             if (map[map_x][map_y]) {
+                *finded_map_cell = map[map_x][map_y];
+
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
                 *out_distance = distance * cos(ray_direction - main_camera.direction);
 
-                /* Получаем точные координаты пересечения луча с стеной на самой стене где 0 и 1 края стены*/
+                /*
+                    Приводим глобальные координаты луча в локальные координаты стенки.
+                    Это диапазон [0.0; 1.0].
+                */
                 double x = fmod(ray_x, 1.0);
                 double y = fmod(ray_y, 1.0);
-                /* если точка находится на координатах x/y > нуля отзеркаливаем эту координату так чтобы расстояние до
-                 ближайшего целого числа осталось равным
-                 перед if:0------------|-------*----1 
-                 после if:0----*-------|------------1   */
-                if (y > 0.5) y = (y - 1.0) * -1.0;
-                if (x > 0.5) x = (x - 1.0) * -1.0;
-                // после выше описанной подготовки к сравнению с целым числом идет сравнение кто ближе к 0
-                /* если x < y => x ≈ 0 => fmod(X:ray_x, Y:1.0) ≈ 0||1 если fmod(X:ray_x, Y:1.0) ≈ 0||1 то луч попал на угл и тогда нет разницы
-                 какую текстуру рисовать или он попал на стену пролегающею вдоль оси Y и мы рисуем текстуру для стены пролегающей вдоль оси Y */
-                if (x < y)
-                    *out_u = ray_y;
-                /* else => x >= y => y ≈ 0 => fmod(X:ray_y, Y:1.0) ≈ 0||1 если fmod(X:ray_y, Y:1.0) ≈ 0||1 то луч попал на угл и тогда нет разницы
-                 какую текстуру рисовать или он попал на стену пролегающею вдоль оси X и мы рисуем текстуру для стены пролегающей вдоль оси X */
-                else
-                    *out_u = ray_x;
+
+                /* Если координата x/y > 0.5, то приводим в диапазон [0; 0.5] */
+                if (x > 0.5) x = 1.0 - x;
+                if (y > 0.5) y = 1.0 - y;
+
+                /* Та точка, что дальше, содержит нужную координату текстуры по иксу. */
+                *out_u = x > y ? ray_x : ray_y;
 
                 return true;
             }

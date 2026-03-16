@@ -15,21 +15,29 @@ extern "C" {
     #pragma clang diagnostic ignored "-Wgnu-folding-constant"
 #endif
 
-static constexpr ivec2_t map_size = {.x = 12, .y = 10};
-static int map[map_size.x][map_size.y] = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+static constexpr ivec2_t map_size = {.x = 12, .y = 12};
+static constexpr unsigned int map[map_size.y][map_size.x] = {
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
 };
+
+#define X(name, index_on_map)                                                                      \
+    static constexpr unsigned int map_texture_##name##_idx = index_on_map - 1;
+
+X(brick_wall, 1);
+X(flower_brick_wall, 2);
+
+#undef X
 
 // FOV = degree * (M_PI / 180) - это перевод градусов в радианты
 // для угла degree в градусах.
@@ -66,5 +74,5 @@ constexpr auto max_raycast_distance = 20.0;
 #endif
 
 #ifdef __cplusplus
-}
+}  // extern "C"
 #endif
