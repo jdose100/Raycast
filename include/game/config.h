@@ -15,8 +15,8 @@ extern "C" {
     #pragma clang diagnostic ignored "-Wgnu-folding-constant"
 #endif
 
-static constexpr ivec2_t map_size = {.x = 12, .y = 12};
-static constexpr unsigned int map[map_size.y][map_size.x] = {
+constexpr ivec2_t map_size = {.x = 12, .y = 12};
+constexpr unsigned int map[map_size.y][map_size.x] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1},
@@ -31,8 +31,11 @@ static constexpr unsigned int map[map_size.y][map_size.x] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
 };
 
-#define X(name, index_on_map)                                                                      \
-    static constexpr unsigned int map_texture_##name##_idx = index_on_map - 1;
+//! Проверяет, находится ли точка на карте.
+static inline bool point_on_map(const unsigned int x, const unsigned int y)
+{ return x < map_size.x && y < map_size.y; }
+
+#define X(name, index_on_map) constexpr unsigned int map_texture_##name##_idx = index_on_map - 1;
 
 X(brick_wall, 1);
 X(flower_brick_wall, 2);
@@ -41,8 +44,8 @@ X(flower_brick_wall, 2);
 
 // FOV = degree * (M_PI / 180) - это перевод градусов в радианты
 // для угла degree в градусах.
-static constexpr double fov = 90 * (M_PI / 180);
-static constexpr double half_fov = fov / 2;
+constexpr double fov = 90 * (M_PI / 180);
+constexpr double half_fov = fov / 2;
 
 static auto const title = "Raycast game";
 
@@ -53,18 +56,12 @@ static struct __screen_config_data screen = {
     .half_height = 600 / 2,
 };
 
-[[maybe_unused]] static player_t player = {
-    .pos = {.x = 2, .y = 2},
+static player_t player = {
+    .pos = {.x = 10, .y = 10},
+    .dir = 0,
 };
 
-static camera_t main_camera = {
-    .pos = {.x = 1, .y = 8},
-    .direction = 0,
-};
-constexpr double camera_speed = 0.1 / 2;
-constexpr double camera_side_speed = camera_speed * 1.3;
-
-constexpr auto max_raycast_distance = 20.0;
+static camera_t main_camera = {};
 
 // --- Recovery GCC and clang diagnostics --- //
 #ifdef __GNUC__

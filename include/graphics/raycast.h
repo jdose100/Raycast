@@ -76,11 +76,12 @@ static void drawing()
 */
 bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *finded_map_cell)
 {
+    constexpr auto max_raycast_distance = 20.0;
     constexpr auto delta = 0.005;
 
     /* Угол луча для текущего столбца. */
-    const double camera_x = 2.0 * x / screen.width - 1.0;  // от -1 до 1
-    auto const ray_direction = main_camera.direction + atan(tan(half_fov) * camera_x);
+    double const camera_x = 2.0 * x / screen.width - 1.0;  // от -1 до 1
+    auto const ray_direction = main_camera.dir + atan(tan(half_fov) * camera_x);
     // printf("%f\n", ray_direction);
 
     /* DDA‑алгоритм (Digital Differential Analyzer) */
@@ -92,17 +93,17 @@ bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *fi
 
     while (distance < max_raycast_distance) {
         // получаем координаты стены пересеченной лучем для проверок
-        const int map_x = (int)ray_x;
-        const int map_y = (int)ray_y;
+        auto const map_x = (unsigned int)ray_x;
+        auto const map_y = (unsigned int)ray_y;
 
         /* Проверка на на отсутствия выхода за область массива. */
-        if (map_x >= 0 && map_x < map_size.x && map_y >= 0 && map_y < map_size.y) {
+        if (point_on_map(map_x, map_y)) {
             /* Проверка на наличие стены (map[map_x][map_y] != 0). */
             if (map[map_y][map_x]) {
                 *finded_map_cell = map[map_y][map_x];
 
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
-                *out_distance = distance * cos(ray_direction - main_camera.direction);
+                *out_distance = distance * cos(ray_direction - main_camera.dir);
 
                 /*
                     Приводим глобальные координаты луча в локальные координаты стенки.

@@ -6,15 +6,16 @@
 
 //! Камера.
 typedef struct {
-    double direction;  //< Угол поворота в радиантах.
-    float last_x;      //< Прошлое значение mice_x.
-    float mice_x;      //< Координата поворота мышки.
-    vec2_t pos;        //< Позиция.
+    float last_x;  //< Прошлое значение mice_x.
+    float mice_x;  //< Координата поворота мышки.
+    double dir;    //< Угол поворота в радиантах.
+    vec2_t pos;    //< Позиция.
 } camera_t;
 
 //! Представление игрока.
 typedef struct {
     vec2_t pos;  //< Позиция.
+    double dir;  //< Угол поворота в радиантах.
 } player_t;
 
 //! \private \brief Данные об экране.
