@@ -71,14 +71,6 @@ void frame(void)
 static void event(const sapp_event *event)
 {
     switch (event->type) {
-        case SAPP_EVENTTYPE_RESIZED: {
-            screen.height = (uint16_t)event->window_height;
-            screen.width = (uint16_t)event->window_width;
-
-            screen.half_height = screen.height / 2;
-            screen.half_width = screen.width / 2;
-        } break;
-
         case SAPP_EVENTTYPE_MOUSE_MOVE: /* Обработка движений мыши. */ {
             constexpr double rotate_speed = 0.05;
 
