@@ -58,7 +58,7 @@ static struct __screen_config_data screen = {
 
 static player_t player = {
     .pos = {.x = 10, .y = 10},
-    .dir = 0,
+    .dir_x = 0,
 };
 
 static camera_t main_camera = {};

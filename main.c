@@ -1,41 +1,56 @@
+// clang-format off
 #include <sokol_app.h>
 #include <sokol_gfx.h>
 #include <sokol_gl.h>
 #include <sokol_glue.h>
 #include <sokol_log.h>
+#include <sokol_debugtext.h>
+// clang-format on
 
 #include "game/move_physics.h"
 #include "graphics/raycast.h"
 
-enum KEYS : unsigned char {
-    KEY_W = 1,
-    KEY_S,
-    KEY_D,
-    KEY_A,
-
-    KEYS_SIZE,
-};
-
 static struct {
     sg_pass_action action;
 
-    bool keys_buffer[KEYS_SIZE];  //< Буфер нажатых клавиш с индексом KEYS.
+    unsigned int frame_count;
+    double time_acc;
+    double fps;
 } state;
 
 void frame(void)
 {
+    // FPS
+    state.frame_count++;
+    state.time_acc += sapp_frame_duration();
+
+    if (state.time_acc > 0.5) {
+        state.fps = (double)state.frame_count / state.time_acc;
+        state.frame_count = 0;
+        state.time_acc = 0;
+    }
+    sdtx_printf("FPS: %.2f\n", state.fps);
+
+    // Drawing.
     sg_begin_pass(&(sg_pass){.action = state.action, .swapchain = sglue_swapchain()});
     sgl_defaults();
 
     drawing();
 
     sgl_draw();
+    sdtx_draw();
+
     sg_end_pass();
     sg_commit();
 }
 
 static void event(const sapp_event *event)
 {
+    if (event->type == SAPP_EVENTTYPE_KEY_DOWN && event->key_code == SAPP_KEYCODE_ESCAPE)
+        sapp_lock_mouse(!sapp_mouse_locked());
+
+    if (!sapp_mouse_locked()) return;
+
     switch (event->type) {
         case SAPP_EVENTTYPE_RESIZED: {
             screen.height = (uint16_t)event->window_height;
@@ -43,42 +58,51 @@ static void event(const sapp_event *event)
 
             screen.half_height = screen.height / 2;
             screen.half_width = screen.width / 2;
+
+            sdtx_canvas(screen.half_width, screen.half_height);
+            sdtx_origin(1.f, 2.f);
         } break;
 
         case SAPP_EVENTTYPE_MOUSE_MOVE: /* Обработка движений мыши. */ {
-            constexpr double rotate_speed = 0.05;
+            const float max_y_offset = screen.half_height * 1.25f;
+            constexpr double rotate_sensitivity_x = 0.02;
+            constexpr float rotate_sensitivity_y = 2.1f;
 
-            player.dir += event->mouse_dx * rotate_speed;
-            if (player.dir > M_PI) player.dir -= 2 * M_PI;
-            if (player.dir < -M_PI) player.dir += 2 * M_PI;
+            // Врашение игрока по координате X.
+            player.dir_x += event->mouse_dx * rotate_sensitivity_x;
+            if (player.dir_x > M_PI) player.dir_x -= 2 * M_PI;
+            if (player.dir_x < -M_PI) player.dir_x += 2 * M_PI;
+
+            // Врашение игрока по координате Y.
+            player.rot_y += event->mouse_dy * rotate_sensitivity_y;
+            if (player.rot_y > max_y_offset) player.rot_y = max_y_offset;
+            if (player.rot_y < -max_y_offset) player.rot_y = -max_y_offset;
+
+            // Применение вращения к камере.
+            main_camera.dir_x = player.dir_x;
+            main_camera.rot_y = player.rot_y;
         } break;
+
+            /* ######################### */
+            /* ### KEYBOARD HANDLING ### */
+            /* ######################### */
 
         case SAPP_EVENTTYPE_KEY_DOWN:
         case SAPP_EVENTTYPE_KEY_UP: /* Обработка нажатий клавиатуры. */ {
-            const bool is_active = event->type == SAPP_EVENTTYPE_KEY_DOWN;
             switch (event->key_code) {
-                case SAPP_KEYCODE_W: state.keys_buffer[KEY_W] = is_active; break;
-                case SAPP_KEYCODE_S: state.keys_buffer[KEY_S] = is_active; break;
-                case SAPP_KEYCODE_D: state.keys_buffer[KEY_D] = is_active; break;
-                case SAPP_KEYCODE_A: state.keys_buffer[KEY_A] = is_active; break;
+                case SAPP_KEYCODE_W: move_forward(); break;
+                case SAPP_KEYCODE_S: move_back(); break;
+                case SAPP_KEYCODE_D: move_right(); break;
+                case SAPP_KEYCODE_A: move_left(); break;
+
                 default: break;
             }
+
+            main_camera.pos = player.pos;
         } break;
 
         default: break;
     }
-
-    /* ######################### */
-    /* ### KEYBOARD HANDLING ### */
-    /* ######################### */
-
-    if (state.keys_buffer[KEY_W]) /* forward */ { move_forward(); }
-    if (state.keys_buffer[KEY_S]) /* back */ { move_back(); }
-    if (state.keys_buffer[KEY_D]) /* right */ { move_right(); }
-    if (state.keys_buffer[KEY_A]) /* left */ { move_left(); }
-
-    main_camera.dir = player.dir;
-    main_camera.pos = player.pos;
 }
 
 static void init(void)
@@ -88,6 +112,14 @@ static void init(void)
         .environment = sglue_environment(),
         .logger.func = slog_func,
     });
+
+    // Инициализация sokol_debugtext.
+    sdtx_setup(&(sdtx_desc_t){
+        .fonts[0] = sdtx_font_c64(),
+        .logger.func = slog_func,
+    });
+    sdtx_canvas(screen.half_width, screen.half_height);
+    sdtx_origin(1.f, 2.f);
 
     // Инициализация sokol_gl.
     sgl_setup(&(sgl_desc_t){.logger.func = slog_func});
@@ -103,10 +135,12 @@ static void init(void)
     };
 
     graphics_init();
+    sapp_lock_mouse(true);
 }
 
 static void cleanup(void)
 {
+    sdtx_shutdown();
     sgl_shutdown();
     sg_shutdown();
 }

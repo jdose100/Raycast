@@ -26,11 +26,22 @@
                                                                     double *,
                                                                     unsigned int *);
 
+bool foo = false;
+int bar = 0;
+
 //! Рисует мир.
 static void drawing()
 {
     sgl_enable_texture();
     defer { sgl_disable_texture(); }
+
+    if (foo && bar <= screen.half_height) {
+        bar += 5;
+        foo = (bar <= screen.half_height);
+    } else if (bar >= -screen.half_height) {
+        bar -= 5;
+        foo = (bar <= -screen.half_height);
+    }
 
     for (auto x = 0; x < screen.width; x++) {
         double distance, u;
@@ -40,8 +51,8 @@ static void drawing()
 
         /* Высота стенки на экране */
         const int line_height = (int)((screen.height / distance) / 2);
-        const int start_y = screen.half_height - line_height;
-        const int end_y = screen.half_height + line_height;
+        const int start_y = screen.half_height - line_height + (int)main_camera.rot_y;
+        const int end_y = screen.half_height + line_height + (int)main_camera.rot_y;
 
         const uint8_t calc_shade = (uint8_t)(255 / (1.0 + distance * distance * 0.1));
         const uint8_t shade = calc_shade < 180 ? calc_shade : 180;
@@ -81,7 +92,7 @@ bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *fi
 
     /* Угол луча для текущего столбца. */
     double const camera_x = 2.0 * x / screen.width - 1.0;  // от -1 до 1
-    auto const ray_direction = main_camera.dir + atan(tan(half_fov) * camera_x);
+    auto const ray_direction = main_camera.dir_x + atan(tan(half_fov) * camera_x);
     // printf("%f\n", ray_direction);
 
     /* DDA‑алгоритм (Digital Differential Analyzer) */
@@ -103,7 +114,7 @@ bool _raycast(const int x, double *out_distance, double *out_u, unsigned int *fi
                 *finded_map_cell = map[map_y][map_x];
 
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
-                *out_distance = distance * cos(ray_direction - main_camera.dir);
+                *out_distance = distance * cos(ray_direction - main_camera.dir_x);
 
                 /*
                     Приводим глобальные координаты луча в локальные координаты стенки.
