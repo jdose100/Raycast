@@ -26,22 +26,11 @@
                                                                     double *,
                                                                     unsigned int *);
 
-bool foo = false;
-int bar = 0;
-
 //! Рисует мир.
 static void drawing()
 {
     sgl_enable_texture();
     defer { sgl_disable_texture(); }
-
-    if (foo && bar <= screen.half_height) {
-        bar += 5;
-        foo = (bar <= screen.half_height);
-    } else if (bar >= -screen.half_height) {
-        bar -= 5;
-        foo = (bar <= -screen.half_height);
-    }
 
     for (auto x = 0; x < screen.width; x++) {
         double distance, u;
