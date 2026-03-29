@@ -4,6 +4,7 @@
 #include <sokol_log.h>
 
 #include "game/config.h"
+// #include "graphics/raycast.h"
 #include "graphics/textures.h"
 
 /*!
@@ -17,7 +18,7 @@ extern "C" {
 static struct {
     sg_view view;
     sg_sampler sampler;
-} _textures[2] = {};
+} _textures[10] = {};
 
 #define _textures_countof (sizeof(_textures) / sizeof(_textures[0]))
 
@@ -42,6 +43,10 @@ static void graphics_init(void)
     _textures[1].sampler = sg_make_sampler(&(sg_sampler_desc){});
 }
 
+[[maybe_unused]] static void drawing() {
+    // _world_drawing();
+} 
+
 #ifdef __cplusplus
-}
+} // extern "C"
 #endif

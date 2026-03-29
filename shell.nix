@@ -7,22 +7,20 @@ with pkgs;
 mkShell rec { 
   buildInputs = [
     gccNGPackages_15.gccWithLibc
-
+    cmake gnumake doxygen
+ 
     vulkan-loader
-    alsa-lib
-
+    alsa-lib 
     libGL
-    xorg.libX11
-    xorg.libXrandr
-    xorg.libXinerama
-    xorg.libXext
-    xorg.libXi
-    xorg.libXcursor
+
+    # X11
+    libX11
+    libXrandr
+    libXinerama
+    libXext
+    libXi
+    libXcursor
   ];
-  
-  shellHook = ''
-    export CMAKE_PREFIX_PATH="${pkgs.sdl3.dev}/lib/cmake:$CMAKE_PREFIX_PATH"
-  '';
 
   LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
 }

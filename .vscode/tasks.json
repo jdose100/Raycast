@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run",
+            "type": "shell",
+            "presentation": {
+                "reveal": "always"
+            }, 
+
+            "isBuildCommand": false,
+            "command": "${workspaceFolder}/build/main",
+            "dependsOn": ["build"]
+        },
+        {
+            "label": "build",
+            "group": "build",
+            "type": "shell",
+            "presentation": {
+                "reveal": "always"
+            },
+
+            "windows": {
+                "command": "cmake",
+                "args": ["--build", "build/"]
+            },
+
+            "command": "nix-shell",
+            "args": ["--run", "'cmake --build build/'"]
+        }
+    ]
+}
+
+

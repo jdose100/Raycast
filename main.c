@@ -7,8 +7,9 @@
 #include <sokol_debugtext.h>
 // clang-format on
 
-#include "game/move_physics.h"
-#include "graphics/raycast.h"
+#include "game/logic.h"
+// #include "game/move_physics.h"
+#include "graphics/raycast/raycast.h"
 
 static struct {
     sg_pass_action action;
@@ -30,18 +31,23 @@ void frame(void)
         state.time_acc = 0;
     }
     sdtx_printf("FPS: %.2f\n", state.fps);
+    sdtx_printf("Camera position(x: %f\ty: %f)\n", main_camera.pos.x, main_camera.pos.y);
 
     // Drawing.
     sg_begin_pass(&(sg_pass){.action = state.action, .swapchain = sglue_swapchain()});
     sgl_defaults();
 
-    drawing();
+    // drawing();
+    raycast_draw();
 
     sgl_draw();
     sdtx_draw();
 
     sg_end_pass();
     sg_commit();
+
+    // Game logic.
+    game_update();
 }
 
 static void event(const sapp_event *event)
@@ -90,10 +96,30 @@ static void event(const sapp_event *event)
         case SAPP_EVENTTYPE_KEY_DOWN:
         case SAPP_EVENTTYPE_KEY_UP: /* Обработка нажатий клавиатуры. */ {
             switch (event->key_code) {
-                case SAPP_KEYCODE_W: move_forward(); break;
-                case SAPP_KEYCODE_S: move_back(); break;
-                case SAPP_KEYCODE_D: move_right(); break;
-                case SAPP_KEYCODE_A: move_left(); break;
+                // case SAPP_KEYCODE_W: move_forward(); break;
+                // case SAPP_KEYCODE_S: move_back(); break;
+                // case SAPP_KEYCODE_D: move_right(); break;
+                // case SAPP_KEYCODE_A: move_left(); break;
+
+                case SAPP_KEYCODE_W:
+                    player.pos.x += cos(main_camera.dir_x) * 0.1;
+                    player.pos.y += sin(main_camera.dir_x) * 0.1;
+                    break;
+
+                case SAPP_KEYCODE_S:
+                    player.pos.x -= cos(main_camera.dir_x) * 0.1;
+                    player.pos.y -= sin(main_camera.dir_x) * 0.1;
+                    break;
+
+                case SAPP_KEYCODE_D:
+                    player.pos.x -= cos(main_camera.dir_x - M_PI_2) * 0.1 * 1.3;
+                    player.pos.y -= sin(main_camera.dir_x - M_PI_2) * 0.1 * 1.3;
+                    break;
+
+                case SAPP_KEYCODE_A:
+                    player.pos.x -= cos(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
+                    player.pos.y -= sin(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
+                    break;
 
                 default: break;
             }
@@ -125,8 +151,6 @@ static void init(void)
     sgl_setup(&(sgl_desc_t){.logger.func = slog_func});
 
     // Инициализация state.
-
-    /* Инициализация action. */
     state.action = (sg_pass_action){
         .colors[0] =  /* clang-format off */ {
             .load_action = SG_LOADACTION_CLEAR,
@@ -136,6 +160,31 @@ static void init(void)
 
     graphics_init();
     sapp_lock_mouse(true);
+
+    // Game init.
+    game_init();
+
+    player.pos = (vec2_t){1.5, 1.5};
+
+    game_add_entity((entity_t){
+        .position = (vec2_t){5, 5},
+        .id = 0,
+    });
+
+    game_add_entity((entity_t){
+        .position = (vec2_t){29, 30},
+        .id = 1,
+    });
+
+    game_add_entity((entity_t){
+        .position = (vec2_t){100, 100},
+        .id = 2,
+    });
+    
+    game_add_entity((entity_t){
+        .position = (vec2_t){15, 5},
+        .id = 3,
+    });
 }
 
 static void cleanup(void)
@@ -143,6 +192,8 @@ static void cleanup(void)
     sdtx_shutdown();
     sgl_shutdown();
     sg_shutdown();
+
+    game_deinit();
 }
 
 sapp_desc sokol_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)

@@ -35,6 +35,7 @@ constexpr unsigned int map[map_size.y][map_size.x] = {
 static inline bool point_on_map(const unsigned int x, const unsigned int y)
 { return x < map_size.x && y < map_size.y; }
 
+// Индексы на карте для текстур.
 #define X(name, index_on_map) constexpr unsigned int map_texture_##name##_idx = index_on_map - 1;
 
 X(brick_wall, 1);

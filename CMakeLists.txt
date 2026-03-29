@@ -31,11 +31,12 @@ set(MATH_LIB m)
 add_executable(main ${PROJECT_SOURCE_DIR}/main.c)
 target_link_libraries(main PRIVATE ${MATH_LIB} depencides shaders)
 target_include_directories(main PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_compile_definitions(main PRIVATE CC_NO_SHORT_NAMES)
 
 target_compile_options(main PRIVATE
     -std=gnu2y -fstack-protector-strong --include defer.h
     # Warnings 
-    -Wformat=2 -Wmissing-field-initializers -Wcast-align -Wcast-qual
+    -Wformat=2 -Wmissing-field-initializers # -Wcast-align -Wcast-qual
     -Werror -Wall -Wextra -Wunreachable-code -Wwrite-strings
     -Wswitch -Wconversion -Wundef
 )
