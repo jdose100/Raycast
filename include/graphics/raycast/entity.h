@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dda.h"
 #include "data.h"
 #include "game/config.h"
 #include "game/data.h"
@@ -11,16 +12,32 @@
 {
     // Сортируем массив сущностей.
     _raycast_quick_sort(&game_data.entities);
-
-    // Перебираем сущности.
-    cc_for_each(&game_data.entities, entity) {
-        const double screen_x = (entity->position.x - -100) / (100 - -100) * screen.width;
-        if (screen_x < 0 || (size_t)screen_x >= zbuffer_len) continue;
-        if (zbuffer[(size_t)screen_x].depth > entity->_distance) continue;
-
+    cc_for_each(&game_data.entities, entity){
+        double ray_angle = atan2((entity->position.y - player.pos.y) , (entity->position.x - player.pos.x));
+        if( ray_angle >= player.dir_x - half_fov || ray_angle <= player.dir_x + half_fov){
+        unsigned screen_x = angle_to_screen_x(ray_angle);
+        if (screen_x == 9999999)
+        break;
+        if(zbuffer[(size_t)screen_x].depth > entity->_distance){
         zbuffer[(size_t)screen_x].type = _ZBUFFER_DATA_TYPE_ENTITY;
         zbuffer[(size_t)screen_x].data.entity = entity;
+        }
     }
+    }
+    // Сортируем массив сущностей.
+    //_raycast_quick_sort(&game_data.entities);
+
+    // Перебираем сущности.
+    //cc_for_each(&game_data.entities, entity) {
+        //***в чем смысл этой строки? entity->position.x это координата на поле ***
+    //    const double screen_x = (entity->position.x - -100) / (100 - -100) * screen.width;
+        
+    //    if (screen_x < 0 || (size_t)screen_x >= zbuffer_len) continue;
+    //    if (zbuffer[(size_t)screen_x].depth > entity->_distance) continue;
+
+    //    zbuffer[(size_t)screen_x].type = _ZBUFFER_DATA_TYPE_ENTITY;
+    //    zbuffer[(size_t)screen_x].data.entity = entity;
+    //}
 }
 
 static entity_t *__raycast_quick_sort2(const size_t len, entity_t array[len]);
@@ -29,7 +46,10 @@ static entity_t *__raycast_quick_sort2(const size_t len, entity_t array[len]);
 {
     // Создаём массив который и будем сортировать.
     const size_t len = cc_size(entities);
+    
     entity_t *array = malloc(len * sizeof(entity_t));
+    if (!array)
+    return;
     defer { free(array); }
 
     // Заполняем массив элементами.

@@ -34,6 +34,7 @@ struct _zbuffer_data;
 
 struct _zbuffer_data {
     double depth;
+    //ray number
     unsigned int x;
 
     union {

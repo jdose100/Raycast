@@ -171,7 +171,7 @@ static void init(void)
         .id = 0,
     });
 
-    game_add_entity((entity_t){
+    /*game_add_entity((entity_t){
         .position = (vec2_t){29, 30},
         .id = 1,
     });
@@ -185,6 +185,7 @@ static void init(void)
         .position = (vec2_t){15, 5},
         .id = 3,
     });
+    */
 }
 
 static void cleanup(void)
