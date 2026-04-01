@@ -33,11 +33,10 @@ struct __screen_config_data {
     uint16_t half_height;  //< half height
 };
 
-typedef struct entity_t entity_t;
 typedef enum entity_status_t entity_status_t;
 
 //! Структура сущности.
-struct entity_t {
+typedef struct entity_t {
     vec2_t position;  //< Position.
     double rotation;  //< Rotation in radians.
     void *user_data;  //< User data.
@@ -46,11 +45,11 @@ struct entity_t {
     double _distance; //< Дистанция от камеры до сущности. 
 
     struct {
-        [[gnu::nonnull(1)]] entity_status_t (*init)(entity_t *self);
-        [[gnu::nonnull(1)]] void (*destroy)(entity_t *self);
-        [[gnu::nonnull(1)]] entity_status_t (*update)(entity_t *self);
+        [[gnu::nonnull(1)]] entity_status_t (*init)(struct entity_t *self);
+        [[gnu::nonnull(1)]] void (*destroy)(struct entity_t *self);
+        [[gnu::nonnull(1)]] entity_status_t (*update)(struct entity_t *self);
     } vtable;  // Entity's functions.
-};
+} entity_t;
 
 //! Состояние сущности.
 enum entity_status_t {

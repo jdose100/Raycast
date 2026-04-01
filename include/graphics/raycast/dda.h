@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits.h>
 #include "game/config.h"
 
 /*!
@@ -70,20 +71,14 @@
 
     return false;
 }
+
 unsigned int angle_to_screen_x(const double angle)
 {
-    /*
-    ray_direction == angle
-    ray_direction = main_camera.dir_x + atan(tan(half_fov) * camera_x)
-    ray_direction - main_camera.dir_x = atan(tan(half_fov) * camera_x) =>
-    tan(ray_direction - main_camera.dir_x) = tan(half_fov) * camera_x
-    tan(ray_direction - main_camera.dir_x) / tan(half_fov) = camera_x
-    */
-    // double const camera_x = 2.0 * x / screen.width - 1.0;  // от -1 до 1
     const double x = ((tan(angle - main_camera.dir_x) / tan(half_fov)) + 1) * screen.width / 2.0;
-    if (x >= 0 && x <= screen.width) {
+    if (x >= 0 && x < screen.width) {
         if (fmod(x, 1.0) > 0.5) return (unsigned int)x + 1;
         return (unsigned int)x;
     }
-    return 9999999;
+    return UINT_MAX;
 }
+

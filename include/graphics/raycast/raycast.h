@@ -83,15 +83,13 @@ static void raycast_draw()
                 const int start_y = screen.half_height - line_height + (int)main_camera.rot_y;
                 const int end_y = screen.half_height + line_height + (int)main_camera.rot_y;
 
-                const vec2_t pos = zbuffer[i].data.entity->position;
-                const float x = ((float)pos.x - -100) / (100 - -100) * screen.width;
-
                 /* Нормализация координат. */
                 const float start_y_normalized = (2.f * (float)start_y / screen.height) - 1.f;
                 const float end_y_normalized = (2.f * (float)end_y / screen.height) - 1.f;
 
-                for (float j = 0; j < 15; j++) { 
-                    const float x_normalized = (2.f * (float)(x + j) / screen.width) - 1.f;
+                /* Отрисовка. */
+                for (int j = -40; j < 0; j++) {
+                    const float x_normalized = (2.f * (float)(i + j) / screen.width) - 1.f;
 
                     sgl_begin_lines();  // clang-format off
                         sgl_v2f(x_normalized, start_y_normalized);

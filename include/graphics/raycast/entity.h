@@ -1,10 +1,12 @@
 #pragma once
 
+#include <sokol_debugtext.h>
+#include <sokol_gfx.h>
+
 #include "data.h"
 #include "dda.h"
 #include "game/config.h"
 #include "game/data.h"
-
 
 [[gnu::nonnull(1)]] static void _raycast_quick_sort(cc_vec(entity_t) * entities);
 
@@ -13,16 +15,24 @@
 {
     // Сортируем массив сущностей.
     _raycast_quick_sort(&game_data.entities);
+
     cc_for_each(&game_data.entities, entity)
     {
-        double ray_angle =
+        const double ray_angle =
             atan2((entity->position.y - player.pos.y), (entity->position.x - player.pos.x));
+
         if (ray_angle >= player.dir_x - half_fov || ray_angle <= player.dir_x + half_fov) {
-            unsigned screen_x = angle_to_screen_x(ray_angle);
-            if (screen_x == 9999999) break;
-            if (zbuffer[(size_t)screen_x].depth > entity->_distance) {
-                zbuffer[(size_t)screen_x].type = _ZBUFFER_DATA_TYPE_ENTITY;
-                zbuffer[(size_t)screen_x].data.entity = entity;
+            const unsigned int screen_x = angle_to_screen_x(ray_angle);
+            if (screen_x == UINT_MAX) break;
+
+            const double dst = pow(entity->position.x - main_camera.pos.x, 2) +
+                               pow(entity->position.y - main_camera.pos.y, 2);
+            entity->_distance = sqrt(dst);
+
+            sdtx_printf("depth: %f\tdistance: %f\n", zbuffer[screen_x].depth, entity->_distance);
+            if (entity->_distance <= zbuffer[screen_x].depth) {
+                zbuffer[screen_x].type = _ZBUFFER_DATA_TYPE_ENTITY;
+                zbuffer[screen_x].data.entity = entity;
             }
         }
     }
@@ -88,12 +98,11 @@ static entity_t *__raycast_quick_sort2(const size_t len, entity_t array[len])
 
     // Разбираем массив на под массивы.
     for (size_t i = 0; i < len; i++) {
-        entity_t current = array[i];
+        const entity_t current = array[i];
 
         // Считаем дистанцию.
         const double dst = pow(current.position.x - main_camera.pos.x, 2) +
                            pow(current.position.y - main_camera.pos.y, 2);
-        current._distance = sqrt(dst);
 
         // Сравниваем.
         if (dst < pivot_dst)
