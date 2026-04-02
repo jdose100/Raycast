@@ -1,6 +1,10 @@
 #pragma once
 
+// clang-format off
+#include <sokol_gfx.h>
+#include <sokol_debugtext.h>
 #include <limits.h>
+// clang-format on
 
 #include "game/config.h"
 
@@ -96,18 +100,25 @@ unsigned int angle_to_screen_x(const double angle)
     // Угол в котором заканчивается поле зрения.
     double end = main_camera.dir_x - half_fov;
 
-    /* Нормализация координат. */
-    if (end < 2 * -M_PI) {
-        if (start < angle && angle < end)
+    sdtx_printf("2 pi = %f\tstart: %f\tend: %f\n", M_PI * 2, start, end);
+    /*
+        Нормализация координат 
+        в диапазон [-2; 2].
+    */
+
+    if (end < -M_PI * 2) {
+        if (start < angle && angle < end) {
             return UINT_MAX;
+        }
 
         end += 4 * M_PI;
         flag = true;
     }
 
-    if (start > 2 * M_PI) {
-        if (start < angle && angle < end)
+    if (start > M_PI * 2) {
+        if (start < angle && angle < end) {
             return UINT_MAX;
+        }
 
         start -= 4 * M_PI;
         flag = true;

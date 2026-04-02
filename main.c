@@ -80,10 +80,10 @@ static void event(const sapp_event *event)
 
             // Врашение игрока по координате X.
             player.dir_x += event->mouse_dx * rotate_sensitivity_x;
-            if (player.dir_x > M_PI)
-                player.dir_x -= 2 * M_PI;
-            if (player.dir_x < -M_PI)
-                player.dir_x += 2 * M_PI;
+            if (player.dir_x > M_PI * 2)
+                player.dir_x -= 4 * M_PI;
+            if (player.dir_x < -M_PI * 2)
+                player.dir_x += 4 * M_PI;
 
             // Врашение игрока по координате Y.
             player.rot_y += event->mouse_dy * rotate_sensitivity_y;
