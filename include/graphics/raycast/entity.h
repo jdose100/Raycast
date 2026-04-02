@@ -20,7 +20,7 @@
     {
         const double ray_angle =
             atan2((entity->position.y - player.pos.y), (entity->position.x - player.pos.x));
-
+        sdtx_printf("_raycast_entities-angle: %.2f\n", ray_angle * 180/ M_PI);
         if (ray_angle >= player.dir_x - half_fov || ray_angle <= player.dir_x + half_fov) {
             const unsigned int screen_x = angle_to_screen_x(ray_angle);
             if (screen_x == UINT_MAX) break;

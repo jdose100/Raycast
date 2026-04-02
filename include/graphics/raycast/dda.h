@@ -74,6 +74,23 @@
 
 unsigned int angle_to_screen_x(const double angle)
 {
+    //сохраняем направления крайних лучей взгляда
+    double main_cam_M_half_fov = main_camera.dir_x - half_fov;
+    double main_cam_P_half_fov = main_camera.dir_x + half_fov;
+    bool flag = true;
+    // нормализация координат
+    if (main_cam_M_half_fov < -2 * M_PI) {
+        main_cam_M_half_fov += 4 * M_PI;
+        if (main_cam_P_half_fov < angle && main_cam_M_half_fov > angle) return UINT_MAX;
+        flag = false;
+    }
+    if (main_cam_P_half_fov > 2 * M_PI) {
+        main_cam_P_half_fov -= 4 * M_PI;
+        if (main_cam_P_half_fov < angle && main_cam_M_half_fov > angle) return UINT_MAX;
+        flag = false;
+    }
+
+    if (!(main_cam_P_half_fov > angle && main_cam_M_half_fov < angle) && flag) return UINT_MAX;
     const double x = ((tan(angle - main_camera.dir_x) / tan(half_fov)) + 1) * screen.width / 2.0;
     if (x >= 0 && x < screen.width) {
         if (fmod(x, 1.0) > 0.5) return (unsigned int)x + 1;
@@ -81,4 +98,3 @@ unsigned int angle_to_screen_x(const double angle)
     }
     return UINT_MAX;
 }
-
