@@ -95,36 +95,41 @@ unsigned int angle_to_screen_x(const double angle)
     bool flag = false;  //< Флаг, обозначающий была нормализация или нет.
 
     // Угол с которого начинается поле зрения.
-    double start = main_camera.dir_x + half_fov;
+    double right = main_camera.dir_x + half_fov;
 
     // Угол в котором заканчивается поле зрения.
-    double end = main_camera.dir_x - half_fov;
+    double left = main_camera.dir_x - half_fov;
 
-    sdtx_printf("2 pi = %f\tstart: %f\tend: %f\n", M_PI * 2, start, end);
+    defer{
+        sdtx_printf("2 pi = %f\tleft: %f\tright: %f\n", M_PI * 2,
+                    left /* 180 / M_PI*/, right /* 180 / M_PI*/);
+    }
     /*
         Нормализация координат 
-        в диапазон [-2; 2].
+        в диапазон [-2pi; 2pi].
     */
 
-    if (end < -M_PI * 2) {
-        if (start < angle && angle < end) {
+    if (left < -M_PI ) {
+        left += 2 * M_PI;
+        sdtx_printf("\nleft: %f\n", left * 180 / M_PI);
+        if (right < angle && angle < left) {
             return UINT_MAX;
         }
 
-        end += 4 * M_PI;
+
         flag = true;
     }
 
-    if (start > M_PI * 2) {
-        if (start < angle && angle < end) {
+    if (right > M_PI) {
+        right -= 2 * M_PI;
+        sdtx_printf("\nright: %f\n", right * 180 / M_PI);
+        if (right < angle && angle < left) {
             return UINT_MAX;
         }
-
-        start -= 4 * M_PI;
         flag = true;
     }
 
-    if (start < angle && angle > end && !flag)
+    if (!(right > angle && angle > left) && !flag)
         return UINT_MAX;
 
     // Преобразование угла в экранное пространство.

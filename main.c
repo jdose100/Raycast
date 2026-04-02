@@ -8,7 +8,7 @@
 // clang-format on
 
 #include "game/logic.h"
-// #include "game/move_physics.h"
+#include "game/move_physics.h"
 #include "graphics/raycast/raycast.h"
 
 static struct {
@@ -80,10 +80,10 @@ static void event(const sapp_event *event)
 
             // Врашение игрока по координате X.
             player.dir_x += event->mouse_dx * rotate_sensitivity_x;
-            if (player.dir_x > M_PI * 2)
-                player.dir_x -= 4 * M_PI;
-            if (player.dir_x < -M_PI * 2)
-                player.dir_x += 4 * M_PI;
+            if (player.dir_x > M_PI)
+                player.dir_x -= 2 * M_PI;
+            if (player.dir_x < -M_PI)
+                player.dir_x += 2 * M_PI;
 
             // Врашение игрока по координате Y.
             player.rot_y += event->mouse_dy * rotate_sensitivity_y;
@@ -104,11 +104,11 @@ static void event(const sapp_event *event)
         case SAPP_EVENTTYPE_KEY_DOWN:
         case SAPP_EVENTTYPE_KEY_UP: /* Обработка нажатий клавиатуры. */ {
             switch (event->key_code) {
-                    // case SAPP_KEYCODE_W: move_forward(); break;
-                    // case SAPP_KEYCODE_S: move_back(); break;
-                    // case SAPP_KEYCODE_D: move_right(); break;
-                    // case SAPP_KEYCODE_A: move_left(); break;
-
+                case SAPP_KEYCODE_W: move_forward(); break;
+                case SAPP_KEYCODE_S: move_back(); break;
+                case SAPP_KEYCODE_D: move_right(); break;
+                case SAPP_KEYCODE_A: move_left(); break;
+                /*
                 case SAPP_KEYCODE_W:
                     player.pos.x += cos(main_camera.dir_x) * 0.1;
                     player.pos.y += sin(main_camera.dir_x) * 0.1;
@@ -128,7 +128,7 @@ static void event(const sapp_event *event)
                     player.pos.x -= cos(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
                     player.pos.y -= sin(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
                     break;
-
+                */
                 default: break;
             }
 
@@ -172,7 +172,7 @@ static void init(void)
     // Game init.
     game_init();
 
-    player.pos = (vec2_t){1.5, 1.5};
+    player.pos = (vec2_t){6, 6};
 
     game_add_entity((entity_t){
         .position = (vec2_t){5, 5},

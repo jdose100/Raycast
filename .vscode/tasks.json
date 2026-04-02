@@ -6,11 +6,13 @@
             "type": "shell",
             "presentation": {
                 "reveal": "always"
-            }, 
-
+            },
             "isBuildCommand": false,
             "command": "${workspaceFolder}/build/main",
-            "dependsOn": ["build"]
+            "dependsOn": [
+                "build"
+            ],
+            "problemMatcher": []
         },
         {
             "label": "build",
@@ -19,14 +21,18 @@
             "presentation": {
                 "reveal": "always"
             },
-
             "windows": {
                 "command": "cmake",
-                "args": ["--build", "build/"]
+                "args": [
+                    "--build",
+                    "build/"
+                ]
             },
-
             "command": "nix-shell",
-            "args": ["--run", "'cmake --build build/'"]
+            "args": [
+                "--run",
+                "'cmake --build build/'"
+            ]
         }
     ]
 }

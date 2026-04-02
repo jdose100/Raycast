@@ -33,7 +33,7 @@
                                pow(entity->position.y - main_camera.pos.y, 2);
             entity->_distance = sqrt(dst);
 
-            sdtx_printf("depth: %f\tdistance: %f\n", zbuffer[screen_x].depth, entity->_distance);
+            //sdtx_printf("depth: %f\tdistance: %f\n", zbuffer[screen_x].depth, entity->_distance);
             if (entity->_distance <= zbuffer[screen_x].depth) {
                 zbuffer[screen_x].type = _ZBUFFER_DATA_TYPE_ENTITY;
                 zbuffer[screen_x].data.entity = entity;
