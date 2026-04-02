@@ -42,7 +42,7 @@ typedef struct entity_t {
     void *user_data;  //< User data.
     size_t id;
 
-    double _distance; //< Дистанция от камеры до сущности. 
+    double _distance;  //< Дистанция от камеры до сущности.
 
     struct {
         [[gnu::nonnull(1)]] entity_status_t (*init)(struct entity_t *self);
@@ -65,12 +65,14 @@ enum entity_status_t {
 extern "C" {
 #endif
 
-[[maybe_unused]] static entity_status_t entity_default_init(entity_t *) { return ENTITY_STATUS_OK; }
+[[maybe_unused]] static entity_status_t entity_default_init(entity_t *)
+{ return ENTITY_STATUS_OK; }
 [[maybe_unused]] static void entity_default_destroy(entity_t *) {}
 [[maybe_unused]] static entity_status_t entity_default_update(entity_t *)
 { return ENTITY_STATUS_OK; }
 
-#define ENTITY_DEFAULT_VTABLE {entity_default_init, entity_default_, destroy, entity_default_update}
+#define ENTITY_DEFAULT_VTABLE                                                  \
+    {entity_default_init, entity_default_, destroy, entity_default_update}
 
 #ifdef __cplusplus
 }  // extern "C"

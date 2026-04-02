@@ -54,21 +54,33 @@ static void raycast_draw()
 
                 /* Высота стенки на экране */
                 const int line_height = (int)((screen.height / distance) / 2);
-                const int start_y = screen.half_height - line_height + (int)main_camera.rot_y;
-                const int end_y = screen.half_height + line_height + (int)main_camera.rot_y;
+
+                const int start_y =
+                    screen.half_height - line_height + (int)main_camera.rot_y;
+
+                const int end_y =
+                    screen.half_height + line_height + (int)main_camera.rot_y;
 
                 /* Затемнение */
-                const uint8_t calc_shade = (uint8_t)(255 / (1.0 + distance * distance * 0.1));
+                const uint8_t calc_shade =
+                    (uint8_t)(255 / (1.0 + distance * distance * 0.1));
+
                 const uint8_t shade = calc_shade < 180 ? calc_shade : 180;
 
                 /* Нормализация координат. */
-                const float start_y_normalized = (2.f * (float)start_y / screen.height) - 1.f;
-                const float end_y_normalized = (2.f * (float)end_y / screen.height) - 1.f;
-                const float x_normalized = (2.f * (float)i / screen.width) - 1.f;
+                const float start_y_normalized =
+                    (2.f * (float)start_y / screen.height) - 1.f;
+
+                const float end_y_normalized =
+                    (2.f * (float)end_y / screen.height) - 1.f;
+
+                const float x_normalized =
+                    (2.f * (float)i / screen.width) - 1.f;
 
                 /* Отрисовка */
                 if (texture < _textures_countof)
-                    sgl_texture(_textures[texture].view, _textures[texture].sampler);
+                    sgl_texture(_textures[texture].view,
+                                _textures[texture].sampler);
 
                 sgl_begin_lines();  // clang-format off
                     sgl_v2f_t2f(x_normalized, start_y_normalized, (float)u, 1.0);
@@ -78,18 +90,26 @@ static void raycast_draw()
             } break;
 
             case _ZBUFFER_DATA_TYPE_ENTITY: {
-                const int line_height =
-                    (int)((screen.height / zbuffer[i].data.entity->_distance) / 2);
-                const int start_y = screen.half_height - line_height + (int)main_camera.rot_y;
-                const int end_y = screen.half_height + line_height + (int)main_camera.rot_y;
+                const double dist = zbuffer[i].data.entity->_distance;
+                const int line_height = (int)((screen.height / dist) / 2);
+
+                const int start_y =
+                    screen.half_height - line_height + (int)main_camera.rot_y;
+
+                const int end_y =
+                    screen.half_height + line_height + (int)main_camera.rot_y;
 
                 /* Нормализация координат. */
-                const float start_y_normalized = (2.f * (float)start_y / screen.height) - 1.f;
-                const float end_y_normalized = (2.f * (float)end_y / screen.height) - 1.f;
+                const float start_y_normalized =
+                    (2.f * (float)start_y / screen.height) - 1.f;
+
+                const float end_y_normalized =
+                    (2.f * (float)end_y / screen.height) - 1.f;
 
                 /* Отрисовка. */
                 for (int j = -40; j < 0; j++) {
-                    const float x_normalized = (2.f * (float)(i + j) / screen.width) - 1.f;
+                    const float x_normalized =
+                        (2.f * (float)(i + j) / screen.width) - 1.f;
 
                     sgl_begin_lines();  // clang-format off
                         sgl_v2f(x_normalized, start_y_normalized);

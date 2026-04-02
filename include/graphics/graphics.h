@@ -30,9 +30,9 @@ static void graphics_init(void)
     const char texture_wall1[] = "assets/textures/wall_1.png";
     const char texture_wall2[] = "assets/textures/wall_2.png";
 
-#define X(idx, path)                                                                               \
-    if (load_texture(&_textures[idx].view, path) != LOAD_TEXTURE_OK) {                             \
-        slog("start, load image", SLOG_PANIC, 0, "Error while loading image");                     \
+#define X(idx, path)                                                           \
+    if (load_texture(&_textures[idx].view, path) != LOAD_TEXTURE_OK) {         \
+        slog("start, load image", SLOG_PANIC, 0, "Error while loading image"); \
     }
 
     X(map_texture_brick_wall_idx, texture_wall2);
@@ -43,10 +43,11 @@ static void graphics_init(void)
     _textures[1].sampler = sg_make_sampler(&(sg_sampler_desc){});
 }
 
-[[maybe_unused]] static void drawing() {
+[[maybe_unused]] static void drawing()
+{
     // _world_drawing();
-} 
+}
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif

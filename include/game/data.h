@@ -2,7 +2,6 @@
 
 #include <cc.h>
 
-#include "ext_math.h"
 #include "structs.h"
 
 struct {

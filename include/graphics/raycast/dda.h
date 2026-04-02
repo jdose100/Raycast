@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits.h>
+
 #include "game/config.h"
 
 /*!
@@ -15,15 +16,18 @@
     \return true если стена была найдена, иначе false.
 */
 [[gnu::nonnull(2, 3, 4)]] [[nodiscard]] static inline bool _raycast_dda(
-    const int x, double *out_distance, double *out_u, unsigned int *finded_map_cell)
+    const int x,
+    double *out_distance,
+    double *out_u,
+    unsigned int *finded_map_cell)
 {
     constexpr auto max_raycast_distance = 20.0;
     constexpr auto delta = 0.005;
 
     /* Угол луча для текущего столбца. */
     double const camera_x = 2.0 * x / screen.width - 1.0;  // от -1 до 1
-    auto const ray_direction = main_camera.dir_x + atan(tan(half_fov) * camera_x);
-    // printf("%f\n", ray_direction);
+    auto const ray_direction =
+        main_camera.dir_x + atan(tan(half_fov) * camera_x);
 
     /* DDA‑алгоритм (Digital Differential Analyzer) */
     const double step_x = cos(ray_direction) * delta;
@@ -44,20 +48,24 @@
                 *finded_map_cell = map[map_y][map_x];
 
                 /* Получаем финальную дистанцию без fish-eye эффекта. */
-                *out_distance = distance * cos(ray_direction - main_camera.dir_x);
+                *out_distance =
+                    distance * cos(ray_direction - main_camera.dir_x);
 
                 /*
-                    Приводим глобальные координаты луча в локальные координаты стенки.
-                    Это диапазон [0.0; 1.0].
+                    Приводим глобальные координаты луча в локальные координаты
+                   стенки. Это диапазон [0.0; 1.0].
                 */
                 double x = fmod(ray_x, 1.0);
                 double y = fmod(ray_y, 1.0);
 
                 /* Если координата x/y > 0.5, то приводим в диапазон [0; 0.5] */
-                if (x > 0.5) x = 1.0 - x;
-                if (y > 0.5) y = 1.0 - y;
+                if (x > 0.5)
+                    x = 1.0 - x;
+                if (y > 0.5)
+                    y = 1.0 - y;
 
-                /* Та точка, что дальше, содержит нужную координату текстуры по иксу. */
+                /* Та точка, что дальше, содержит нужную координату текстуры по
+                 * иксу. */
                 *out_u = x > y ? ray_x : ray_y;
 
                 return true;
@@ -72,29 +80,51 @@
     return false;
 }
 
+/*!
+    \brief Преобразует угол в координату экрана x.
+    \param[in] angle угол для преобразования (в радиантах).
+    \return Возвращает координату x на экране или UINT_MAX при неудаче.
+*/
 unsigned int angle_to_screen_x(const double angle)
 {
-    //сохраняем направления крайних лучей взгляда
-    double main_cam_M_half_fov = main_camera.dir_x - half_fov;
-    double main_cam_P_half_fov = main_camera.dir_x + half_fov;
-    bool flag = true;
-    // нормализация координат
-    if (main_cam_M_half_fov < -2 * M_PI) {
-        main_cam_M_half_fov += 4 * M_PI;
-        if (main_cam_P_half_fov < angle && main_cam_M_half_fov > angle) return UINT_MAX;
-        flag = false;
-    }
-    if (main_cam_P_half_fov > 2 * M_PI) {
-        main_cam_P_half_fov -= 4 * M_PI;
-        if (main_cam_P_half_fov < angle && main_cam_M_half_fov > angle) return UINT_MAX;
-        flag = false;
+    /* Сохраняем направления крайних лучей взгляда. */
+    bool flag = false;  //< Флаг, обозначающий была нормализация или нет.
+
+    // Угол с которого начинается поле зрения.
+    double start = main_camera.dir_x + half_fov;
+
+    // Угол в котором заканчивается поле зрения.
+    double end = main_camera.dir_x - half_fov;
+
+    /* Нормализация координат. */
+    if (end < 2 * -M_PI) {
+        if (start < angle && angle < end)
+            return UINT_MAX;
+
+        end += 4 * M_PI;
+        flag = true;
     }
 
-    if (!(main_cam_P_half_fov > angle && main_cam_M_half_fov < angle) && flag) return UINT_MAX;
-    const double x = ((tan(angle - main_camera.dir_x) / tan(half_fov)) + 1) * screen.width / 2.0;
+    if (start > 2 * M_PI) {
+        if (start < angle && angle < end)
+            return UINT_MAX;
+
+        start -= 4 * M_PI;
+        flag = true;
+    }
+
+    if (start < angle && angle > end && !flag)
+        return UINT_MAX;
+
+    // Преобразование угла в экранное пространство.
+    const double x = (tan(angle - main_camera.dir_x) / tan(half_fov) + 1) *
+                     screen.width / 2.0;
+
     if (x >= 0 && x < screen.width) {
-        if (fmod(x, 1.0) > 0.5) return (unsigned int)x + 1;
+        if (fmod(x, 1.0) > 0.5)
+            return (unsigned int)x + 1;
         return (unsigned int)x;
     }
+
     return UINT_MAX;
 }
