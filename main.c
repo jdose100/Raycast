@@ -7,9 +7,11 @@
 #include <sokol_debugtext.h>
 // clang-format on
 
+#include "game/game_physics.h"
 #include "game/logic.h"
 #include "game/move_physics.h"
 #include "graphics/raycast/raycast.h"
+
 
 static struct {
     sg_pass_action action;
@@ -108,6 +110,34 @@ static void event(const sapp_event *event)
                 case SAPP_KEYCODE_S: move_back(); break;
                 case SAPP_KEYCODE_D: move_right(); break;
                 case SAPP_KEYCODE_A: move_left(); break;
+                case SAPP_KEYCODE_I:
+                    cc_for_each(&game_data.entities, entity)
+                    {
+                        if (entity->id == 0)
+                            entity->position.x+=0.1;
+                    };
+                    break;
+                case SAPP_KEYCODE_K:
+                    cc_for_each(&game_data.entities, entity)
+                    {
+                        if (entity->id == 0)
+                            entity->position.x -= 0.1;
+                    };
+                    break;
+                case SAPP_KEYCODE_L:
+                    cc_for_each(&game_data.entities, entity)
+                    {
+                        if (entity->id == 0)
+                            entity->position.y += 0.1;
+                    };
+                    break;
+                case SAPP_KEYCODE_J:
+                    cc_for_each(&game_data.entities, entity)
+                    {
+                        if (entity->id == 0)
+                            entity->position.y -= 0.1;
+                    };
+                    break;
                 /*
                 case SAPP_KEYCODE_W:
                     player.pos.x += cos(main_camera.dir_x) * 0.1;
@@ -177,6 +207,7 @@ static void init(void)
     game_add_entity((entity_t){
         .position = (vec2_t){5, 5},
         .id = 0,
+        .vtable.update = entity_update
     });
 
     /*game_add_entity((entity_t){

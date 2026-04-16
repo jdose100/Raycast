@@ -45,6 +45,7 @@ typedef struct entity_t {
     double _distance;  //< Дистанция от камеры до сущности.
 
     struct {
+        
         [[gnu::nonnull(1)]] entity_status_t (*init)(struct entity_t *self);
         [[gnu::nonnull(1)]] void (*destroy)(struct entity_t *self);
         [[gnu::nonnull(1)]] entity_status_t (*update)(struct entity_t *self);
