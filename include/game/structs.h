@@ -42,6 +42,12 @@ typedef struct entity_t {
     void *user_data;  //< User data.
     size_t id;
 
+    unsigned int forced_movement_timer; // as lower the number as slower the entity could move forced teal gets 0 and stops
+    double light;                       // as lower the number as harder it could be tu move this entity forced
+    double forced_movement_dir;         // the direction of forced movement if not betwen -2PI and 2PI the entity dosn't move
+
+    int hp;                     // hp
+
     double _distance;  //< Дистанция от камеры до сущности.
 
     struct {

@@ -6,13 +6,17 @@ constexpr double distance_push_from_wall = 1.025;
 constexpr double move_speed = 0.1 / 1.0;
 constexpr double side_move_speed = move_speed * 1.3;
 
-static void move_forward(void)
+static void move_forward_P(player_t *player, double movement_dir)
 {
+    if (movement_dir > 2 * M_PI)
+        movement_dir -= 4 * M_PI;
+    if (movement_dir < -2 * M_PI)
+        movement_dir += 4 * M_PI;
     const unsigned int map_x =
-        (unsigned int)(player.pos.x + cos(player.dir_x) * move_speed);
+        (unsigned int)(player->pos.x + cos(movement_dir) * move_speed);
 
     const unsigned int map_y =
-        (unsigned int)(player.pos.y + sin(player.dir_x) * move_speed);
+        (unsigned int)(player->pos.y + sin(movement_dir) * move_speed);
 
     /* Проверка, что нет выхода за карту. */
     if (!point_on_map(map_x, map_y))
@@ -20,30 +24,83 @@ static void move_forward(void)
 
     // clang-format off
     // Координата X.
-    if (map[(unsigned int)player.pos.y][map_x] == 0) {
-        player.pos.x += cos(player.dir_x) * move_speed;
-    } else if (cos(player.dir_x) > 0) {
-        player.pos.x = 
-            floor(player.pos.x + cos(player.dir_x) * move_speed) + min_dist_from_wall;
+    if (map[(unsigned int)player->pos.y][map_x] == 0) {
+        player->pos.x += cos(movement_dir) * move_speed;
+    } else if (cos(movement_dir) > 0) {
+        player->pos.x = 
+            floor(player->pos.x + cos(movement_dir) * move_speed) + min_dist_from_wall;
     } else {
-        player.pos.x = 
-            floor(player.pos.x + cos(player.dir_x) * move_speed) + distance_push_from_wall;
+        player->pos.x = 
+            floor(player->pos.x + cos(movement_dir) * move_speed) + distance_push_from_wall;
     }
 
     // Координата Y.
-    if (map[map_y][(unsigned int)player.pos.x] == 0) {
-        player.pos.y += sin(player.dir_x) * move_speed;
-    } else if (sin(player.dir_x) > 0) {
-        player.pos.y =
-            floor(player.pos.y + sin(player.dir_x) * move_speed) + min_dist_from_wall;
+    if (map[map_y][(unsigned int)player->pos.x] == 0) {
+        player->pos.y += sin(movement_dir) * move_speed;
+    } else if (sin(movement_dir) > 0) {
+        player->pos.y =
+            floor(player->pos.y + sin(movement_dir) * move_speed) + min_dist_from_wall;
     } else {
-        player.pos.y =
-            floor(player.pos.y + sin(player.dir_x) * move_speed) + distance_push_from_wall;
+        player->pos.y =
+            floor(player->pos.y + sin(movement_dir) * move_speed) + distance_push_from_wall;
     }
     // clang-format on
 }
+static unsigned int move_forward_Е(entity_t *target,
+                          double movement_dir,
+                          double e_move_speed)
+{
+    if (movement_dir > 2 * M_PI)
+        movement_dir -= 4 * M_PI;
+    if (movement_dir < -2 * M_PI)
+        movement_dir += 4 * M_PI;
+    const unsigned int map_x =
+        (unsigned int)(target->position.x + cos(movement_dir) * e_move_speed);
 
-static void move_back(void)
+    const unsigned int map_y =
+        (unsigned int)(target->position.y + sin(movement_dir) * e_move_speed);
+
+    /* Проверка, что нет выхода за карту. */
+    if (!point_on_map(map_x, map_y)) {
+        return 0;
+    }
+    bool punched_to_a_wall = false;
+    // clang-format off
+    // Координата X.
+    if (map[(unsigned int)target->position.y][map_x] == 0) {
+        target->position.x += cos(movement_dir) * e_move_speed;
+    } else { punched_to_a_wall = true; 
+        if (cos(movement_dir) > 0) {
+        target->position.x = 
+            floor(target->position.x + cos(movement_dir) * e_move_speed) + min_dist_from_wall;
+    }   else {
+        target->position.x = 
+            floor(target->position.x + cos(movement_dir) * e_move_speed) + distance_push_from_wall;
+    }
+    }
+
+    // Координата Y.
+    if (map[map_y][(unsigned int)target->position.x] == 0) {
+        target->position.y += sin(movement_dir) * e_move_speed;
+    } else {    punched_to_a_wall = true;
+        if (sin(movement_dir) > 0) {
+        target->position.y =
+            floor(target->position.y + sin(movement_dir) * e_move_speed) + min_dist_from_wall;
+    }   else {
+        target->position.y =
+            floor(target->position.y + sin(movement_dir) * e_move_speed) + distance_push_from_wall;
+    }
+    }
+    if (punched_to_a_wall && target->forced_movement_timer != 0){
+        unsigned int dmg = target->forced_movement_timer - 5;
+        target->forced_movement_timer = 0;
+        target->forced_movement_dir = 9;
+        return dmg;
+    }
+    return 0;
+    // clang-format on
+}
+/*static void move_back(void)
 {
     const unsigned int map_x =
         (unsigned int)(player.pos.x - cos(player.dir_x) * move_speed);
@@ -51,7 +108,7 @@ static void move_back(void)
     const unsigned int map_y =
         (unsigned int)(player.pos.y - sin(player.dir_x) * move_speed);
 
-    /* Проверка, что нет выхода за карту. */
+    // Проверка, что нет выхода за карту.
     if (!point_on_map(map_x, map_y))
         return;
 
@@ -61,10 +118,9 @@ static void move_back(void)
         player.pos.x -= cos(player.dir_x) * move_speed;
     } else if (cos(player.dir_x) > 0) {
         player.pos.x =
-            floor(player.pos.x - cos(player.dir_x) * move_speed) + distance_push_from_wall;
-    } else {
-        player.pos.x =
-            floor(player.pos.x - cos(player.dir_x) * move_speed) + min_dist_from_wall;
+            floor(player.pos.x - cos(player.dir_x) * move_speed) +
+distance_push_from_wall; } else { player.pos.x = floor(player.pos.x -
+cos(player.dir_x) * move_speed) + min_dist_from_wall;
     }
 
     // Координата Y.
@@ -72,10 +128,9 @@ static void move_back(void)
         player.pos.y -= sin(player.dir_x) * move_speed;
     } else if (sin(player.dir_x) > 0) {
         player.pos.y =
-            floor(player.pos.y - sin(player.dir_x) * move_speed) + distance_push_from_wall;
-    } else {
-        player.pos.y =
-            floor(player.pos.y - sin(player.dir_x) * move_speed) + min_dist_from_wall;
+            floor(player.pos.y - sin(player.dir_x) * move_speed) +
+distance_push_from_wall; } else { player.pos.y = floor(player.pos.y -
+sin(player.dir_x) * move_speed) + min_dist_from_wall;
     }
     // clang-format on
 }
@@ -90,7 +145,7 @@ static void move_right(void)
         (unsigned int)(player.pos.y -
                        sin(player.dir_x - M_PI_2) * side_move_speed);
 
-    /* Проверка, что нет выхода за карту. */
+    // Проверка, что нет выхода за карту.
     if (!point_on_map(map_x, map_y))
         return;
 
@@ -105,11 +160,11 @@ static void move_right(void)
         player.pos.y -= sin(player.dir_x - M_PI_2) * side_move_speed;
     } else if (sin(player.dir_x - M_PI_2) > 0) {
         player.pos.y =
-            floor(player.pos.y - sin(player.dir_x - M_PI_2) 
+            floor(player.pos.y - sin(player.dir_x - M_PI_2)
                     * side_move_speed) + distance_push_from_wall;
     } else {
         player.pos.y =
-            floor(player.pos.y - sin(player.dir_x - M_PI_2) 
+            floor(player.pos.y - sin(player.dir_x - M_PI_2)
                     * side_move_speed) + min_dist_from_wall;
     }
     // clang-format on
@@ -125,7 +180,7 @@ static void move_left(void)
         (unsigned int)(player.pos.y -
                        sin(player.dir_x + M_PI_2) * side_move_speed);
 
-    /* Проверка, что нет выхода за карту. */
+    // Проверка, что нет выхода за карту.
     if (!point_on_map(map_x, map_y))
         return;
 
@@ -149,3 +204,4 @@ static void move_left(void)
     }
     // clang-format on
 }
+*/

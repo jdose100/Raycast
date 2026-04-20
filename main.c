@@ -9,9 +9,8 @@
 
 #include "game/game_physics.h"
 #include "game/logic.h"
-#include "game/move_physics.h"
+// #include "game/move_physics.h"
 #include "graphics/raycast/raycast.h"
-
 
 static struct {
     sg_pass_action action;
@@ -74,6 +73,21 @@ static void event(const sapp_event *event)
             sdtx_canvas(screen.half_width, screen.half_height);
             sdtx_origin(1.f, 2.f);
         } break;
+        case SAPP_EVENTTYPE_MOUSE_DOWN:
+            if (event->mouse_button == SAPP_MOUSEBUTTON_LEFT) {
+                if (true /*temp*/) {
+                    cc_for_each(&game_data.entities, entity)
+                    {
+                        if (entity->id == 0) {
+                            if (entity->forced_movement_timer == 0) {
+                                entity->forced_movement_timer = 20;
+                                entity->forced_movement_dir = player.dir_x;
+                            }
+                        }
+                    };
+                }
+            }
+            break;
 
         case SAPP_EVENTTYPE_MOUSE_MOVE: /* Обработка движений мыши. */ {
             const float max_y_offset = screen.half_height * 1.25f;
@@ -104,17 +118,26 @@ static void event(const sapp_event *event)
             /* ######################### */
 
         case SAPP_EVENTTYPE_KEY_DOWN:
-        case SAPP_EVENTTYPE_KEY_UP: /* Обработка нажатий клавиатуры. */ {
+        case SAPP_EVENTTYPE_KEY_UP: /* Обработка нажатий клавиатуры. */
+        {
             switch (event->key_code) {
-                case SAPP_KEYCODE_W: move_forward(); break;
-                case SAPP_KEYCODE_S: move_back(); break;
-                case SAPP_KEYCODE_D: move_right(); break;
-                case SAPP_KEYCODE_A: move_left(); break;
+                case SAPP_KEYCODE_W:
+                    move_forward_P(&player, player.dir_x);
+                    break;
+                case SAPP_KEYCODE_S:
+                    move_forward_P(&player, player.dir_x + M_PI);
+                    break;
+                case SAPP_KEYCODE_D:
+                    move_forward_P(&player, player.dir_x + M_PI_2);
+                    break;
+                case SAPP_KEYCODE_A:
+                    move_forward_P(&player, player.dir_x - M_PI_2);
+                    break;
                 case SAPP_KEYCODE_I:
                     cc_for_each(&game_data.entities, entity)
                     {
                         if (entity->id == 0)
-                            entity->position.x+=0.1;
+                            entity->position.x += 0.1;
                     };
                     break;
                 case SAPP_KEYCODE_K:
@@ -138,27 +161,31 @@ static void event(const sapp_event *event)
                             entity->position.y -= 0.1;
                     };
                     break;
-                /*
-                case SAPP_KEYCODE_W:
-                    player.pos.x += cos(main_camera.dir_x) * 0.1;
-                    player.pos.y += sin(main_camera.dir_x) * 0.1;
-                    break;
 
-                case SAPP_KEYCODE_S:
-                    player.pos.x -= cos(main_camera.dir_x) * 0.1;
-                    player.pos.y -= sin(main_camera.dir_x) * 0.1;
-                    break;
+                    /*
 
-                case SAPP_KEYCODE_D:
-                    player.pos.x -= cos(main_camera.dir_x - M_PI_2) * 0.1 * 1.3;
-                    player.pos.y -= sin(main_camera.dir_x - M_PI_2) * 0.1 * 1.3;
-                    break;
+                                    case SAPP_KEYCODE_W:
+                                        player.pos.x +=
+                       cos(main_camera.dir_x) * 0.1; player.pos.y +=
+                       sin(main_camera.dir_x) * 0.1; break;
 
-                case SAPP_KEYCODE_A:
-                    player.pos.x -= cos(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
-                    player.pos.y -= sin(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
-                    break;
-                */
+                                    case SAPP_KEYCODE_S:
+                                        player.pos.x -=
+                       cos(main_camera.dir_x) * 0.1; player.pos.y -=
+                       sin(main_camera.dir_x) * 0.1; break;
+
+                                    case SAPP_KEYCODE_D:
+                                        player.pos.x -=
+                       cos(main_camera.dir_x - M_PI_2) * 0.1 * 1.3;
+                       player.pos.y -= sin(main_camera.dir_x -
+                       M_PI_2) * 0.1 * 1.3; break;
+
+                                    case SAPP_KEYCODE_A:
+                                        player.pos.x -=
+                       cos(main_camera.dir_x + M_PI_2) * 0.1 * 1.3;
+                       player.pos.y -= sin(main_camera.dir_x +
+                       M_PI_2) * 0.1 * 1.3; break;
+                                    */
                 default: break;
             }
 
@@ -207,7 +234,11 @@ static void init(void)
     game_add_entity((entity_t){
         .position = (vec2_t){5, 5},
         .id = 0,
-        .vtable.update = entity_update
+        .vtable.update = entity_update,
+        .forced_movement_timer = 0,
+        .forced_movement_dir = 9,
+        .light = 0.01,
+        .hp = 100
     });
 
     /*game_add_entity((entity_t){
